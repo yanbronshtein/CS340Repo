@@ -1,0 +1,263 @@
+HW2 CS340
+@author Yaniv Bronshtein
+
+#Part A: Standard Directories and Files
+**** Root Directory (/) ****
+[brya2229@venus ~]$ cd /
+[brya2229@venus /]$ ls -l | head -6
+total 3396
+lrwxrwxrwx.    1 root root       7 May 10  2019 bin -> usr/bin
+dr-xr-xr-x.    6 root root    4096 Feb  7 20:40 boot
+drwxr-xr-x.   22 root root    3480 Jan 24 13:22 dev
+drwxr-xr-x.  162 root root   12288 Feb 11 13:57 etc
+drwxr-xr-x.   18 root root    4096 Feb 13 09:44 home
+
+
+**** /bin ****
+[brya2229@venus /]$ cd /bin
+[brya2229@venus bin]$ ls -l | head -6
+total 657768
+-rwxr-xr-x. 1 root root       65936 May 11  2019 [
+lrwxrwxrwx. 1 root root           6 May 13  2019 a2x -> a2x.py
+-rwxr-xr-x. 1 root root       37017 May 13  2019 a2x.py
+-rwxr-xr-x. 1 root root       62504 Dec 23 15:46 ab
+-rwxr-xr-x. 1 root root       18992 Nov 19 11:42 abrt-action-analyze-backtrace
+
+I recognize the following commands:
+1. vim: Opens the command line editor vim. If provided a file argument, 
+the vim command opens either the existing file or creates a new one
+2. which: command used to identify the location of executables.
+3. whereis: command used to find the location of source/binary file of a 
+command and manuals sections for a specified file in Linux system.
+4. who: who command is used to find out time of last system boot, current run level of the system, 
+list of logged in users and more.
+5. ssh: we always use it to login to venus through a secure shell connection
+6. mv: command used to rename a file or move a file to a new location
+
+
+
+**** /dev ****
+[brya2229@venus bin]$ cd /dev/
+[brya2229@venus dev]$ ls -l | head -6
+total 0
+crw-r--r--.  1 root root     10, 235 Jan 16 12:57 autofs
+drwxr-xr-x.  2 root root         240 Jan 16 11:49 block
+drwxr-xr-x.  2 root root         100 Jan 16 11:49 bsg
+drwxr-xr-x.  3 root root          60 Jan 16 11:49 bus
+drwxr-xr-x.  2 root root        5800 Jan 24 13:22 char
+
+I recognize the stdin and stdout devices. The former is used when taking
+command line input from the user and the second is used to display the output
+of various commands, programs, and Files
+
+**** /etc ****
+[brya2229@venus dev]$ cd /etc/
+[brya2229@venus etc]$ ls -l | head -6
+total 2704
+drwxr-xr-x.  3 root root       101 Nov 19 11:42 abrt
+-rw-r--r--.  1 root root        18 Jan 16 11:35 adjtime
+-rw-r--r--.  1 root root      1518 Sep 10  2018 aliases
+-rw-r--r--.  1 root root     12288 Jan 16 12:52 aliases.db
+drwxr-xr-x.  3 root root        65 Nov 11 10:31 alsa
+
+I have heard of the following files:
+1. bashrc which is a shell script that bash runs to initialize its shells
+2. zshrc which is a shell script use by the zsh shell to initialize its environment
+3. hostname which contains the hosts
+
+The most used permission is reading. Almost every user has the permission to reading
+for the etc directory
+(SEE etc/passwd section for printout)
+
+**** /lib ****
+[brya2229@venus etc]$ cd /lib/
+[brya2229@venus lib]$ ls -l | head -6
+total 44
+drwxr-xr-x.  3 root root    18 Nov 11 10:31 alsa
+drwxr-xr-x.  2 root root     6 Feb  4 11:01 binfmt.d
+lrwxrwxrwx.  1 root root    10 Nov  5 23:36 cpp -> ../bin/cpp
+drwxr-xr-x.  9 root root   109 Nov 26 16:41 cups
+drwxr-xr-x.  4 root root    76 Jan 16 11:30 debug
+
+**** /tmp ****
+[brya2229@venus lib]$ cd /tmp/
+[brya2229@venus tmp]$ ls -l | head -6
+total 80
+-rwxr-xr-x. 1 fean0611 underg  11784 Feb  3 20:10 a.out
+-rw-r--r--. 1 begi2976 underg    278 Feb  3 17:26 Benedicto_Giunel_HW#1.cpp
+-rw-r--r--. 1 siel1644 underg    440 Jan 30 20:46 homework1.cpp
+-rw-r--r--. 1 fean0611 underg    469 Feb  3 19:39 Homework1.cpp
+-rw-r--r--. 1 fean0611 underg    469 Feb  3 20:08 Homework1.cpp.save
+
+**** /etc/passwd ****
+[brya2229@venus tmp]$ head -6 /etc/passwd
+root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/bin:/sbin/nologin
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+adm:x:3:4:adm:/var/adm:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+sync:x:5:0:sync:/sbin:/bin/sync
+
+# Part B: Determine the absolute pathname for your home directory
+[brya2229@venus etc]$ echo $HOME
+/home/sp20/340/brya2229
+[brya2229@venus etc]$ pwd
+/etc
+
+# Part C: Shell(s) and Shell Environment variables
+[brya2229@venus /etc]$ echo $SHELL
+/bin/bash
+[brya2229@venus /etc]$ chsh
+[brya2229@venus /etc]$ cat /etc/shells
+/bin/sh
+/bin/bash
+/usr/bin/sh
+/usr/bin/bash
+/usr/bin/tmux
+/bin/tmux
+
+[brya2229@venus /etc]$ chsh
+Changing shell for brya2229.
+New shell [/bin/bash]
+/usr/bin/tcsh
+Password: 
+Shell changed.
+
+[brya2229@venus /etc]$ ps
+  PID TTY          TIME CMD
+ 7319 pts/27   00:00:00 bash
+44400 pts/27   00:00:00 csh
+45404 pts/27   00:00:00 ps
+
+
+I don't have a lot of things running right now on mars. I only have bash, csh
+and the ps command I'm using
+# Part D: Processes
+1. The ps utility displays a header line, followed by lines containing information about all of
+your processes that have controlling terminals.
+-It will display one line per process
+-A: Other user processes
+-a: Other user processes plus your own
+-C: Change the way CPU calculates percentage by using raw calculation
+-c: Only include executable name
+-d: Like -A minus the session leaders
+-E: Display environment information also.
+-e: Same as -A.
+
+
+3. [brya2229@venus /etc]$ ps -l | head -6
+F S   UID   PID  PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD
+0 S  8326  7319  7312  0  80   0 -  6177 -      pts/27   00:00:00 bash
+0 S  8326 44400  7319  0  80   0 -  7330 -      pts/27   00:00:00 csh
+0 R  8326 59503 44400  0  80   0 - 11191 -      pts/27   00:00:00 ps
+0 S  8326 59504 44400  0  80   0 -  1823 -      pts/27   00:00:00 head
+
+F: Lists the flags( -f, -o, l, -l, s, u, and v that only control how data is formatted in
+the output table)
+S:( Can be one of R,D,S,Z,T)
+where R means Runnable, D means uninterruptable sleep, 
+S means interruptable sleep, Z means zombie state, and T means stopped
+UID: username of the process owner. An actual number assigned to a linux user
+PID: Unique number assigned to a process in linux
+PPID: Tells you the process ID of the "original process" In this table 
+one can see that several of the processes originated from PID 44400
+C: Tells the CPU usage of a process
+PRI: Priority of a process meaning its place on the queue
+Every process listed here has priority 80. Integer in range 0 to +139
+NI: an integer value in the range -20 to +19 that like PRI is one of the indicators
+for the priority in the user space
+ADDR: Is the hexadecimal address of the process(where the process lives in memory)
+SZ: describes the virtual memory usage of the process
+WCHAN: since processes receive time slices, they need to know some information on 
+the processes taking up time before them Memory address of the event the process 
+is waiting for
+TTY: TTY ports are direct connections to the computer such as a 
+keyboard/mouse or a serial connection to the device so this integer value specifies which one
+TIME: Time in milliseconds that the process used the CPU for
+CMD: details the linux command that initiated the process
+
+4. 
+[brya2229@venus /etc]$ top
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND                                                                                                                               
+32846 chel8063  20   0   46160   8324   5456 R  99.7   0.0  13149:48 vim                                                                                                                                   
+ 3138 beta6341  20   0   46416   8564   5440 S   0.7   0.0   0:00.07 vim                                                                                                                                   
+18060 gdm       20   0   11.1g   1.1g  90888 S   0.7   0.2  37:57.34 gnome-shell                                                                                                                           
+18570 root      20   0   10.4g 295576 101504 S   0.7   0.1  25:43.88 gnome-shell                                                                                                                           
+ 3221 brya2229  20   0   64972   5952   4208 R   0.3   0.0   0:00.10 top                                                                                                                                   
+ 7312 brya2229  20   0  159760   6148   4528 S   0.3   0.0   0:00.12 sshd                                                                                                                                  
+    1 root      20   0  246000  15004   9108 S   0.0   0.0   5:57.79 systemd                                                                                                                               
+    2 root      20   0       0      0      0 S   0.0   0.0   0:08.52 kthreadd 
+
+
+5. Give the total number of tasks, number of running processes, sleeping processes, 
+stopped processes and zombies.
+
+[brya2229@venus ~]$ top -bn1 | grep running
+Tasks: 1082 total,   2 running, 1078 sleeping,   2 stopped,   0 zombie
+
+Verdict:
+2 running, 1078 sleeping, 2 stopped, 0 zombies
+
+6. 
+[brya2229@venus ~]$ ps
+  PID TTY          TIME CMD
+ 3351 pts/13   00:00:00 bash
+ 4632 pts/13   00:00:00 ps
+[brya2229@venus ~]$ kill 3351
+[brya2229@venus ~]$ ps
+  PID TTY          TIME CMD
+ 3351 pts/13   00:00:00 bash
+ 4700 pts/13   00:00:00 ps
+
+ 7. 
+[brya2229@venus ~]$ vi tester.sh &
+[1] 5387
+[brya2229@venus ~]$ vi hello.c &
+[2] 5410
+
+[1]+  Stopped                 vim tester.sh
+[brya2229@venus ~]$ ps
+  PID TTY          TIME CMD
+ 3351 pts/13   00:00:00 bash
+ 5387 pts/13   00:00:00 vim
+ 5410 pts/13   00:00:00 vim
+ 5484 pts/13   00:00:00 ps
+
+[2]+  Stopped                 vim hello.c
+[brya2229@venus ~]$ kill -9 5387
+[brya2229@venus ~]$ ps
+  PID TTY          TIME CMD
+ 3351 pts/13   00:00:00 bash
+ 5410 pts/13   00:00:00 vim
+ 5653 pts/13   00:00:00 ps
+[1]-  Killed                  vim tester.sh
+
+Part E:
+
+BOOL CreateProcessA(
+  LPCSTR                lpApplicationName,
+  LPSTR                 lpCommandLine,
+  LPSECURITY_ATTRIBUTES lpProcessAttributes,
+  LPSECURITY_ATTRIBUTES lpThreadAttributes,
+  BOOL                  bInheritHandles,
+  DWORD                 dwCreationFlags,
+  LPVOID                lpEnvironment,
+  LPCSTR                lpCurrentDirectory,
+  LPSTARTUPINFOA        lpStartupInfo,
+  LPPROCESS_INFORMATION lpProcessInformation
+);
+
+This C++ command takes in an optional application name, 
+a command(Ex: For batch files, you have to start the interpreter; setting lpApplicationName to cmd.exe and set lpCommandLine to : /c plus the name of the batch file.)
+The next two arguments help determine if child processes can inherit from this process and if threads can do it
+The fifth argument is as follows: If TRUE, each inheritable handle in the calling process is inherited by the new process. Otherwise it is not
+The sixth argument specifies flags that detail priority class and creation of the process.
+The seventh argument is a pointer to the environment block for the new process
+The eighth argument specifies the directory where the process is first executed 
+The ninth argument specifies Specifies the window station, desktop, standard handles, and appearance of the main window for a process at creation time.
+The tenth and final argument specifies the receipt of identification information about the new process.
+
+
+
+
+
