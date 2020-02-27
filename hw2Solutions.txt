@@ -65,9 +65,10 @@ I have heard of the following files:
 2. zshrc which is a shell script use by the zsh shell to initialize its environment
 3. hostname which contains the hosts
 
-The most used permission is reading. Almost every user has the permission to reading
-for the etc directory
-(SEE etc/passwd section for printout)
+There are three user types on a Linux system . User, Group and Other. 
+Linux divides the file permissions into read, write and execute denoted by r,w, and x.
+-rwxr-xr-x: a normal file where user has all 3 permissions, group has read and execute, and other has read and execute
+dr-x------: a directory where user can read and execute, group has no permissions, and other has no permissions
 
 **** /lib ****
 [brya2229@venus etc]$ cd /lib/
@@ -97,6 +98,14 @@ daemon:x:2:2:daemon:/sbin:/sbin/nologin
 adm:x:3:4:adm:/var/adm:/sbin/nologin
 lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
 sync:x:5:0:sync:/sbin:/bin/sync
+
+[brya2229@venus tmp]$ cat /etc/passwd
+biad0879:x:9161:800:Adam Bieber:/home/sp19/111/biad0879:/bin/bash
+feda8171:x:9162:800:Daniel Feit:/home/sp19/111/feda8171:/bin/bash
+shwo2128:x:9163:800:Wong T Sherpa:/home/sp20/211/shwo2128:/bin/bash
+daad2552:x:9164:800:Adela Datja:/home/sp19/340/daad2552:/bin/tcsh
+ryja3443:x:9165:800:Jaroslaw Rybak:/home/sp20/340/ryja3443:/bin/bash
+lera9761:x:9166:800:Raymond Leow:/home/sp19/81/lera9761:/bin/bash
 
 # Part B: Determine the absolute pathname for your home directory
 [brya2229@venus etc]$ echo $HOME
@@ -135,14 +144,13 @@ and the ps command I'm using
 # Part D: Processes
 1. The ps utility displays a header line, followed by lines containing information about all of
 your processes that have controlling terminals.
--It will display one line per process
--A: Other user processes
--a: Other user processes plus your own
--C: Change the way CPU calculates percentage by using raw calculation
--c: Only include executable name
--d: Like -A minus the session leaders
--E: Display environment information also.
--e: Same as -A.
+D	Uninterruptible sleep (usually IO)
+R	Running or runnable (on run queue)
+S	Interruptible sleep (waiting for an event to complete)
+T	Stopped, either by a job control signal or because it is being traced.
+W	paging (not valid since the 2.6.xx kernel)
+X	dead (should never be seen)
+Z	Defunct (“zombie”) process, terminated but not reaped by its parent.
 
 
 3. [brya2229@venus /etc]$ ps -l | head -6
@@ -152,14 +160,13 @@ F S   UID   PID  PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD
 0 R  8326 59503 44400  0  80   0 - 11191 -      pts/27   00:00:00 ps
 0 S  8326 59504 44400  0  80   0 -  1823 -      pts/27   00:00:00 head
 
-F: Lists the flags( -f, -o, l, -l, s, u, and v that only control how data is formatted in
-the output table)
+F: Lists the flags( -f, -o, l, -l, s, u, and v) that specify how data should be presented
 S:( Can be one of R,D,S,Z,T)
-where R means Runnable, D means uninterruptable sleep, 
-S means interruptable sleep, Z means zombie state, and T means stopped
+where R is Runnable, D is uninterruptable sleep, 
+S is interruptable sleep, Z means zombie state, and T means stopped
 UID: username of the process owner. An actual number assigned to a linux user
 PID: Unique number assigned to a process in linux
-PPID: Tells you the process ID of the "original process" In this table 
+PPID: Tells the process ID of the "original process" In this table 
 one can see that several of the processes originated from PID 44400
 C: Tells the CPU usage of a process
 PRI: Priority of a process meaning its place on the queue
@@ -201,39 +208,32 @@ Verdict:
 6. 
 [brya2229@venus ~]$ ps
   PID TTY          TIME CMD
- 3351 pts/13   00:00:00 bash
- 4632 pts/13   00:00:00 ps
-[brya2229@venus ~]$ kill 3351
+29246 pts/6    00:00:00 vim
+29571 pts/6    00:00:00 ps
+33473 pts/6    00:00:00 bash
+[brya2229@venus ~]$ kill 33473
 [brya2229@venus ~]$ ps
   PID TTY          TIME CMD
- 3351 pts/13   00:00:00 bash
- 4700 pts/13   00:00:00 ps
+29246 pts/6    00:00:00 vim
+31704 pts/6    00:00:00 ps
+33473 pts/6    00:00:00 bash
+
+The shell process has PID 33473 and running regular kill does not kill the process
+
+
 
  7. 
-[brya2229@venus ~]$ vi tester.sh &
-[1] 5387
-[brya2229@venus ~]$ vi hello.c &
-[2] 5410
+Connection to mars.cs.qc.cuny.edu closed.
+Yanivs-MacBook-Pro:~ yanivbronshtein$ 
+ 
+ The sure kill can kill any process while the regular kill can be ignored by the OS. 
+ That is why the bash shell on venus was forcefully closed and I was left back in my shell on my personal computer
 
-[1]+  Stopped                 vim tester.sh
-[brya2229@venus ~]$ ps
-  PID TTY          TIME CMD
- 3351 pts/13   00:00:00 bash
- 5387 pts/13   00:00:00 vim
- 5410 pts/13   00:00:00 vim
- 5484 pts/13   00:00:00 ps
 
-[2]+  Stopped                 vim hello.c
-[brya2229@venus ~]$ kill -9 5387
-[brya2229@venus ~]$ ps
-  PID TTY          TIME CMD
- 3351 pts/13   00:00:00 bash
- 5410 pts/13   00:00:00 vim
- 5653 pts/13   00:00:00 ps
-[1]-  Killed                  vim tester.sh
+
 
 Part E:
-
+1.
 BOOL CreateProcessA(
   LPCSTR                lpApplicationName,
   LPSTR                 lpCommandLine,
@@ -257,6 +257,44 @@ The eighth argument specifies the directory where the process is first executed
 The ninth argument specifies Specifies the window station, desktop, standard handles, and appearance of the main window for a process at creation time.
 The tenth and final argument specifies the receipt of identification information about the new process.
 
+2.
+[brya2229@venus CS340Repo]$ ./parent
+Process[41491]: Parent in execution ...
+Process[41492]: child in execution ...
+Process[41492]: child terminating ...
+Process[41491]: Parent detects terminating child 
+Process[41491]: Parent terminating ...
+
+Explanation: The first line is code found in parent.c.
+The parent's PID is printed. A fork() call creates a child process by invoking the system command init()
+execve() is used to specify the executable containing the child process's code (child.c)
+This causes the program currently running (parent.c) to be replaced with a new program (child.c) 
+The child process prints its PID, delays the process for one second and then prints its PID again
+Control returns to the parent process which uses wait() to detect the end of the child process (last line of code)
+If the return value of wait() is greater than 0, the child has terminated. The parent prints its PID.
+Finally, the parent ends its execution by printing its PID
+
+
+[brya2229@venus CS340Repo]$ ./orphan
+I'm the original process with PID 42113 and PPID 37694.
+I'm the parent process with PID 42113 and PPID 37694.
+my child's PID 42114
+PID 42113 terminates.
+[brya2229@venus CS340Repo]$ I'm the child process with PID 42114 and PPID 1.
+PID 42114 terminates.
+
+Explanation:
+The first line printed in orphan.c is the PID of the current process and its parent
+A call to fork creates a child process by calling init()
+If we are still in the current process(a.k.a fork() returns a value greater than 0),
+the program prints the current process PID, its PPID, and the newly created child's PID
+The program skips the else and prints the current process's PID and terminates.
+The child process is adopted by P1. The program enters the "else" block, where after 
+a delay of 5 seconds, the ID of the orphaned child is printed along with the ID of its new parent
+which must be 1. 
+
+
+If the value returned by fork() is 0, the process is stalled for 5 seconds
 
 
 
