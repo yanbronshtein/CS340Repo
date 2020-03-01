@@ -1,6 +1,6 @@
-// A C program to demonstrate Zombie Process.  
-// Child becomes Zombie as parent is sleeping 
-// when child process exits. 
+// Author: Yaniv Bronshtein  
+// The child process a Zombie (a.ka <defunct> process) when parent process is put to sleep and it has terminated 
+// When the parent process wakes up the child stops being a zombie and all processes terminate successfully. 
 #include <stdlib.h> 
 #include <sys/types.h> 
 #include <unistd.h> 
@@ -9,27 +9,28 @@ int main()
 { 
     // Fork returns process id 
     // in parent process 
-    pid_t child_pid = fork(); 
+    int pid = fork(); 
   
     // Parent process  
-    if (child_pid > 0) {
-        printf("Parent process %d going to sleep\n",getpid());
-        sleep(200); 
-        printf("Parent Finished execution with PID: %d\n",getpid());
+    if (pid > 0) {
+        printf("I am the parent and my id is %d\n",getpid());
+        // sleep(200); //Force parent to sleep for 200 seconds so child can terminate first
+        // printf("Parent Finished execution with PID: %d\n",getpid());
 
     }
   
     // Child process 
     else {        
-        printf("In child with PID: %d\n",getpid());
-        
-        for (int i = 0; i < 10; i++)
-        {
-          printf("From Child with PID:%d\n",getpid());
-          printf("Count: %d\n",i);
-          sleep(1);
+        printf("I am the child with pid %d and my parent has ppid %d\n",getpid(),getppid());
+        // for (int i = 0; i < 10; i++)
+        // {
+        //   printf("From Child with PID:%d\n",getpid());
+        //   printf("Count: %d\n",i);
+        //   sleep(1);
           
-        }
+        // }
+
+        sleep(1);
         
         printf("Exiting from Child with PID: %d\n",getpid());
         exit(0); 
