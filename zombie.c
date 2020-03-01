@@ -20,19 +20,20 @@ int main()
     }
   
     // Child process 
-    else        
+    else {        
         printf("In child with PID: %d\n",getpid());
         
         for (int i = 0; i < 10; i++)
         {
           printf("From Child with PID:%d\n",getpid());
           printf("Count: %d\n",i);
-          sleep(10);
+          sleep(1);
           
         }
         
         printf("Exiting from Child with PID: %d\n",getpid());
         exit(0); 
+    }
   
     return 0; 
 } 
