@@ -6,6 +6,7 @@
 #include <unistd.h> 
 #include <stdio.h>
 #include <sys/wait.h>
+#define NULL 0
 int main() 
 { 
   // Fork returns process id 
@@ -22,7 +23,7 @@ int main()
     printf("I am the child with pid [%d] and my parent has ppid [%d]\n",getpid(),getppid());
     sleep(1);
     exit(0); 
-    printf("Result of wait(): %d \n",wait(null));
+    printf("Result of wait(): %d \n",wait(NULL));
   }
   return 0; 
 } 
