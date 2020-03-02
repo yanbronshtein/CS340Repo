@@ -6,7 +6,7 @@
 #include <unistd.h> 
 #include <stdio.h>
 #include <sys/wait.h>
-#define NULL 0
+// #define NULL 0
 int main() 
 { 
   // Fork returns process id 
