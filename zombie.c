@@ -22,8 +22,8 @@ int main()
   else {        
     printf("I am the child with pid [%d] and my parent has ppid [%d]\n",getpid(),getppid());
     sleep(1);
-    exit(0); 
     printf("Result of wait(): %d \n",wait(NULL));
+    exit(0); 
   }
   return 0; 
 } 
