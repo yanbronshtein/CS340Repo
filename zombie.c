@@ -5,6 +5,7 @@
 #include <sys/types.h> 
 #include <unistd.h> 
 #include <stdio.h>
+#include <sys/wait.h>
 int main() 
 { 
   // Fork returns process id 
