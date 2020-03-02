@@ -13,14 +13,15 @@ int main()
   
   // Parent process  
   if (pid > 0) {
-    printf("I am the parent and my id is %d\n",getpid());
-    sleep(200); //Force parent to sleep for 200 seconds so child can terminate first and turn into a zombie
+    printf("I am the parent and my id is [%d]\n",getpid());
+    sleep(30); //Force parent to sleep for 30 seconds so child can terminate first and turn into a zombie
   }
   // Child process 
   else {        
-    printf("I am the child with pid %d and my parent has ppid %d\n",getpid(),getppid());
+    printf("I am the child with pid [%d] and my parent has ppid [%d]\n",getpid(),getppid());
     sleep(1);
     exit(0); 
+    printf("Result of wait(): %d \n",wait(null));
   }
   return 0; 
 } 
