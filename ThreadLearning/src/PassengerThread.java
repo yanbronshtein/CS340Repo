@@ -30,7 +30,7 @@ public class PassengerThread extends Thread {
 
     public static long time = System.currentTimeMillis();
     public PassengerThread(int id) {
-        setName("Passenger-" + id);
+        setName("Passenger-" + (id + 1));
     }
 
     public void msg(String m) {
@@ -93,23 +93,20 @@ public class PassengerThread extends Thread {
 //
             /* ******Critical Section ****/
             if (KioskClerkThread.isCounter0IsFree()) {
-                msg("Entered first queue");
+                msg("Added zero queue");
                 KioskClerkThread.counter0Deque.add(this);
             }
             else if (KioskClerkThread.isCounter1IsFree()) {
-                msg("Entered second queue");
+                msg("Added to one queue");
                 KioskClerkThread.counter1Deque.add(this);
+            }else {
+                msg("Added to waiting queue");
+                KioskClerkThread.waitingDeque.add(this);
+
             }
 
-//            } else {
-//                while (!KioskClerkThread.isCounter0IsFree() && !KioskClerkThread.isCounter1IsFree()) {
-//                    msg("Stuck in Passenger while loop");
-//                    sleep(100);
-//                }
-//            }
-
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            msg("Interrupted rudely");
         }
     }
 

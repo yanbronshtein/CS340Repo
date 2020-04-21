@@ -179,18 +179,26 @@ public class KioskClerkThread extends Thread {
 
     public void run() {
         while (totalNumberPassengersServed < Main.numPassengers) {
-            while (counter0Deque.isEmpty() && counter1Deque.isEmpty()) {
-                try {
-                    sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+//            while (counter0Deque.isEmpty() && counter1Deque.isEmpty()) {
+//
+//                try {
+//                    msg("Sleeping because both counter queues are empty");
+//                    sleep(500);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
             if (currentThread().getName().equals("KioskClerk-0")) {
                 if (!counter0Deque.isEmpty()) {
                     PassengerThread servedPassenger = counter0Deque.removeFirst();
                     assignTicket(servedPassenger);
                     totalNumberPassengersServed++;
+
+                    if (!waitingDeque.isEmpty()) {
+                        counter0Deque.add(waitingDeque.removeFirst());
+                    }
+                } else {
+                    continue;
                 }
             }
             if (currentThread().getName().equals("KioskClerk-1")) {
@@ -198,6 +206,11 @@ public class KioskClerkThread extends Thread {
                     PassengerThread servedPassenger = counter1Deque.removeFirst();
                     assignTicket(servedPassenger);
                     totalNumberPassengersServed++;
+                    if (!waitingDeque.isEmpty()) {
+                        counter1Deque.add(waitingDeque.removeFirst());
+                    }
+                } else {
+                    continue;
                 }
             }
         }
