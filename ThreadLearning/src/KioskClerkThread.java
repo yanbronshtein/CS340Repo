@@ -62,29 +62,28 @@ public class KioskClerkThread extends Thread {
                         c0Deque.add(waitDeque.remove(0));
                         c0Size.addAndGet(1);
                     }
-//                } else {
-//                    continue;
-//                }
+                } else {
+                    continue;
                 }
-                if (currentThread().getName().equals("KioskClerk-1")) {
-                    if (!c1Deque.isEmpty()) {
-                        c1Size.addAndGet(-1);
-                        PassengerThread servedPassenger = c1Deque.remove(0);
-                        assignTicket(servedPassenger);
-                        totalNumberPassengersServed++;
-                        if (!waitDeque.isEmpty()) {
-                            c1Deque.add(waitDeque.remove(0));
-                            c1Size.addAndGet(1);
-                        }
+            }
+            if (currentThread().getName().equals("KioskClerk-1")) {
+                if (!c1Deque.isEmpty()) {
+                    c1Size.addAndGet(-1);
+                    PassengerThread servedPassenger = c1Deque.remove(0);
+                    assignTicket(servedPassenger);
+                    totalNumberPassengersServed++;
+                    if (!waitDeque.isEmpty()) {
+                        c1Deque.add(waitDeque.remove(0));
+                        c1Size.addAndGet(1);
                     }
                 }
             }
         }
-
         msg("All passengers have been served. Check-in clerks done for the day");
+
     }
 
-    
+
     private void assignTicket(PassengerThread servedPassenger) {
         int seatNum = randomNumbersList.remove(0);
         int zoneNum;

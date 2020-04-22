@@ -3,7 +3,7 @@ public class PassengerThread extends Thread {
     private int seatNum;
     private int zoneNum;
     private int groupNum;
-//    public static int c0Size = KioskClerkThread.c0Deque.size();
+    //    public static int c0Size = KioskClerkThread.c0Deque.size();
 //    public static int c1Size = KioskClerkThread.c1Deque.size();
     public int getTicketNum() {
         return seatNum;
@@ -101,6 +101,7 @@ public class PassengerThread extends Thread {
 
     private void goThroughSecurity() {
         setPriority(getPriority() + 1);
+
 
 
     }
