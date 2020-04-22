@@ -1,6 +1,8 @@
 public class Main {
-    public static PassengerThread[] passengers;
+    public static ClockThread clock;
     public static KioskClerkThread[] clerks;
+    public static PassengerThread[] passengers;
+    public static FlightAttendantThread flightAttendant;
     public static int numPassengers = 30;
     public static int numClerks = 2;
     public static int counterNum = 3;

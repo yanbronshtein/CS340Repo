@@ -1,81 +1,124 @@
-import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
-
 public class PassengerThread extends Thread {
 
+    private int seatNum;
+    private int zoneNum;
+    private int groupNum;
+    //    public static int c0Size = KioskClerkThread.c0Deque.size();
+//    public static int c1Size = KioskClerkThread.c1Deque.size();
+    public int getTicketNum() {
+        return seatNum;
+    }
+
+    public void setTicketNum(int ticketNum) {
+        this.seatNum = ticketNum;
+    }
+
+    public int getZoneNum() {
+        return zoneNum;
+    }
+
+    public void setZoneNum(int zoneNum) {
+        this.zoneNum = zoneNum;
+    }
+
+    public int getGroupNum() {
+        return groupNum;
+    }
+
+    public void setGroupNum(int groupNum) {
+        this.groupNum = groupNum;
+    }
 
     public static long time = System.currentTimeMillis();
-    public static int seatNum = 0;
-    public static int zoneNum = 0;
-    public static int groupNum = 0;
-
-    public PassengerThread(int num) {
-        setName("Passenger-" + (num+1));
+    public PassengerThread(int id) {
+        setName("Passenger-" + (id + 1));
     }
-    /** Passenger line at check-in counter */
-    public static Queue<PassengerThread> passengersAtCheckInLine = new LinkedList<>();
-
 
     public void msg(String m) {
         System.out.println("[" + (System.currentTimeMillis() - time) + "]" + getName() + ":" + m);
     }
 
+    @Override
     public void run() {
-
-        arriveAtAirport();
-
-
-
-
-        //1.sleep(rand) each pass. arrives at random time
-        //2.Go straight to clerk to check in
-        //Once received ticket, to simulate rushing, elevate priority by 1 priority+1
-        //Use thread message "Customer has arrived
-        //sleep(rand) WILL simulate at security line doing security shit
-        //priority-1
-
-        //sleep() passenger walking in door
-
+        try {
+            sleep((long) (Math.random() *1000));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        msg("Arrived at airport");
+        getBoardingPass();
 
     }
 
 
-    public void arriveAtAirport() {
-        /* Customer arrives between 3 and 5 hours before the flight */
-        try {
-            sleep(ThreadLocalRandom.current().nextLong(6 * Main.THIRTY_MINUTES, 10 * Main.THIRTY_MINUTES));
-            msg("Passenger Arrives at the airport and goes to check-in counter");
 
+    private void getBoardingPass() {
+        int c0Size;
+        int c1Size;
+        synchronized (KioskClerkThread.c0Deque) {
+            c0Size = KioskClerkThread.c0Deque.size();
+        }
+        synchronized (KioskClerkThread.c1Deque) {
+            c1Size = KioskClerkThread.c1Deque.size();
+        }
+        System.out.println("c0Size: " + c0Size + "c1Size: " + c1Size);
+        if (c0Size < Main.counterNum && c1Size < Main.counterNum) {
+            if (c0Size < c1Size) {
+                msg("Added zero queue");
+                KioskClerkThread.c0Deque.add(this);
+//                KioskClerkThread.c0Size.addAndGet(1);
+            } else if (c0Size > c1Size) {
+                msg("Added to one queue");
+                KioskClerkThread.c1Deque.add(this);
+//                KioskClerkThread.c1Size.addAndGet(1);
+
+            } else {
+                int randNum = (int) Math.round( Math.random());
+
+                if (randNum == 0) {
+                    msg("Added to zero queue randomly");
+                    KioskClerkThread.c0Deque.add(this);
+//                    KioskClerkThread.c0Size.addAndGet(1);
+                } else {
+                    msg("Added to one queue randomly");
+                    KioskClerkThread.c1Deque.add(this);
+//                    KioskClerkThread.c1Size.addAndGet(1);
+                }
+            }
+        } else {
+            while (c0Size == Main.counterNum && c1Size == Main.counterNum) {
+                try {
+                    msg("Busy wait to approach counter");
+                    sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        goThroughSecurity();
+
+    }
+
+
+    private void goThroughSecurity() {
+        msg("Rushing to security");
+        setPriority(getPriority() + 1);
+        try {
+            sleep((long) (Math.random() * 3000));
         } catch (InterruptedException e) {
-            msg("Interrupted!");
+            e.printStackTrace();
         }
 
-        //Busy wait if the number of passengers on a line is 3
-         while (KioskClerkThread.counter1Deque.size() ==3 && KioskClerkThread.counter2Deque.size() == 3) {
-             //No-op
-         }
-
-         printBoardingPass();
+        setPriority(getPriority() -1);
+        msg("Arrived At Gate");
+        while (true) {
+            try {
+                sleep((long) (Math.random() * 1000));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
-
-    private void printBoardingPass() {
-        goToSecurityLine();
-
-    }
-
-    private void goToSecurityLine() {
-        msg("Rushing to security line");
-        //Simulate rushing by using getPriority() and setPriority()
-        //Increase priority of passenger
-        //After sleep of random time, set priority back to default val
-
-
-        /*Go to gate */
-        //Simulate taking seat and waiting for flight attendant using BW
-
-    }
-
-
-
-
 }
+
+

@@ -1,33 +1,47 @@
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class KioskClerkThread extends Thread {
-
-    public volatile int numPassengersOnLine;
-    public volatile int numPassengersServed;
-    public static Deque<PassengerThread> counter1Deque = new LinkedList<>();
-    public static Deque<PassengerThread> counter2Deque = new LinkedList<>();
-    public static Deque<PassengerThread> zone1Queue = new LinkedList<>();
-    public static Deque<PassengerThread> zone2Queue = new LinkedList<>();
-    public static Deque<PassengerThread> zone3Queue = new LinkedList<>();
-    private String lineNumStr;
-
-    private static ArrayList<Integer> randomNums;
-//    public static int getNumPassengersOnLine() {
-//        return numPassengersOnLine;
-//    }
-//
-//    public static void setNumPassengersOnLine(int numPassengersOnLine) {
-//        KioskClerkThread.numPassengersOnLine = numPassengersOnLine;
-//    }
-
     public static long time = System.currentTimeMillis();
-    public KioskClerkThread(int id) {
+    //    private static final int maxAllowedOnLine = 3;
+//    public static boolean[] countersAvailable = {true,true}; //Initially both counters are free
 
-        setName("KioskClerk-" + id);
-        numPassengersOnLine = 0;
-        numPassengersServed = 0;
+    public static Vector<PassengerThread> c0Deque = new Vector<>(Main.counterNum);
+    public static AtomicInteger c0Size;
+    public static AtomicInteger c1Size;
 
+    public static Vector<PassengerThread> c1Deque = new Vector<>(Main.counterNum);
+    public static Vector<PassengerThread> waitDeque = new Vector<>();
+    public static int totalNumberPassengersServed;
+    private static int id;
+    private static ArrayList<Integer> randomNumbersList = new ArrayList<>();
+//    public static boolean counter1IsFree;
+//    public static boolean counter2IsFree;
+
+    public static boolean c0Free() {
+        return c0Deque.size() < Main.counterNum;
+    }
+
+    public static boolean c1Free() {
+        return c1Deque.size() < Main.counterNum;
+    }
+
+    public KioskClerkThread(int num) {
+        setName("KioskClerk-" + num);
+        id = num;
+        totalNumberPassengersServed = 0;
+        randomNumbersList = generateRandomNumbers();
+        c0Size = new AtomicInteger(0);
+        c1Size = new AtomicInteger(0);
+    }
+
+    private ArrayList<Integer> generateRandomNumbers() {
+        ArrayList<Integer> list = new ArrayList<>();
+        for (int i = 1; i <= Main.numPassengers; i++) {
+            list.add(i);
+        }
+        Collections.shuffle(list);
+        return list;
     }
 
     public void msg(String m) {
@@ -35,53 +49,52 @@ public class KioskClerkThread extends Thread {
     }
 
 
-
     @Override
     public void run() {
-        //Once customer comes, announce ticket and give to customer
-        //Anounce: Seat+Zone+Customer_Name
-        //Have to have some way to know if all passengers have received their ticket
-        //terminate
-        msg("Waiting for passengers");
-        randomNums = new ArrayList<>();
-        for (int i = 1; i <= 30; i++) {
-            randomNums.add(i);
+        while (totalNumberPassengersServed < Main.numPassengers) {
+            if (currentThread().getName().equals("KioskClerk-0")) {
+                if (!c0Deque.isEmpty()) {
+                    PassengerThread servedPassenger = c0Deque.remove(0);
+                    assignTicket(servedPassenger);
+                    totalNumberPassengersServed++;
+
+                    if (!waitDeque.isEmpty()) {
+                        c0Deque.add(waitDeque.remove(0));
+                        c0Size.addAndGet(1);
+                    }
+                } else {
+                    continue;
+                }
+            }
+            if (currentThread().getName().equals("KioskClerk-1")) {
+                if (!c1Deque.isEmpty()) {
+                    c1Size.addAndGet(-1);
+                    PassengerThread servedPassenger = c1Deque.remove(0);
+                    assignTicket(servedPassenger);
+                    totalNumberPassengersServed++;
+                    if (!waitDeque.isEmpty()) {
+                        c1Deque.add(waitDeque.remove(0));
+                        c1Size.addAndGet(1);
+                    }
+                }
+            }
         }
-        Collections.shuffle(randomNums);
-        assignTickets();
-        msg("Done for the day");
-
-
-
-    }
-
-    private void assignTickets() {
-        msg("Assigning tickets");
-        //Generate a number between 1 and 30 with a corresponding zone#
-        int ticketNum = randomNums.get(0);
-        randomNums.remove(0);
-
-
-        //1-10: Zone1 (Add to zone1 queue)
-        //11-20: Zone2 (Add to zone2 queue)
-        //21-30: Zone3 (Add to zone3 queue)
-
-        //when all passengers got their tickets, check-in clerks are done for the day(terminate)
-
-
-
-
-    }
-
-    private void generateRandom(ArrayList<Integer> randomNums) {
+        msg("All passengers have been served. Check-in clerks done for the day");
 
     }
 
 
-
-
-
-
-
-
+    private void assignTicket(PassengerThread servedPassenger) {
+        int seatNum = randomNumbersList.remove(0);
+        int zoneNum;
+        if (seatNum >= 0 && seatNum <= 10)
+            zoneNum = 1;
+        else if (seatNum >= 11 && seatNum <= 20)
+            zoneNum = 2;
+        else
+            zoneNum = 3;
+        servedPassenger.setZoneNum(zoneNum);
+        servedPassenger.setTicketNum(seatNum);
+        msg(servedPassenger.getName() + ": is in seat " + seatNum + " and zone " + zoneNum);
+    }
 }

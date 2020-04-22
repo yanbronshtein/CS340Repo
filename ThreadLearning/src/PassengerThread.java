@@ -47,7 +47,6 @@ public class PassengerThread extends Thread {
         }
         msg("Arrived at airport");
         getBoardingPass();
-        goThroughSecurity();
 
     }
 
@@ -96,14 +95,29 @@ public class PassengerThread extends Thread {
                 }
             }
         }
+        goThroughSecurity();
+
     }
 
 
     private void goThroughSecurity() {
+        msg("Rushing to security");
         setPriority(getPriority() + 1);
+        try {
+            sleep((long) (Math.random() * 3000));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-
-
+        setPriority(getPriority() -1);
+        msg("Arrived At Gate");
+        while (true) {
+            try {
+                sleep((long) (Math.random() * 1000));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
 
