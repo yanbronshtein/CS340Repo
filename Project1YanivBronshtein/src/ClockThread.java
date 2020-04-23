@@ -1,9 +1,11 @@
+import java.util.concurrent.ThreadLocalRandom;
+
 public class ClockThread extends Thread {
 
 
     public static long time = System.currentTimeMillis();
-    private int totalTime;
-    public ClockThread(int totalTime) {
+    private long totalTime;
+    public ClockThread(long totalTime) {
         setName("Clock-");
         this.totalTime = totalTime;
     }
@@ -16,31 +18,30 @@ public class ClockThread extends Thread {
 
     @Override
     public void run() {
+        // Sleep for 2.5 hours
         try {
-//            sleep(flightTime);
-//            for(int i=0; i<Main.cashier.length;i ++)
-//            {
-//                if(Main.clerks[i].isAlive())
-//                    Main.clerks[i].interrupt();
-//            }
-//
-//            for(int i=0; i<Main..length; i++)
-//            {
-//                if(Main.customer[i].isAlive())
-//                    Main.customer[i].interrupt();
-//            }
-//            for(int i=0; i<Main.floorClerk.length; i++)
-//            {
-//                if(Main.floorClerk[i].isAlive())
-//                    Main.floorClerk[i].interrupt();
-//            }
-
-            if (!Main.flightAttendant.isInterrupted()) {
-                Main.flightAttendant.interrupt();
-            }
+            sleep(5*Main.THIRTY_MIN);
         } catch (InterruptedException e) {
-            msg("Gates are closed. Plane is departing");
+            e.printStackTrace();
         }
+        //Notify flight attendant that it is time to board
+        Main.flightAttendant.interrupt();
+
+        //Sleep for the duration of the flight up till the flight attend is to announce that
+        // the plane is preparing for landing
+        try {
+            sleep(4*Main.THIRTY_MIN);
+        }catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        //todo: Add code to signal passengers terminating
+
+
+
+
+
+        msg("All passengers have disembarked. Clock terminating");
 
 
     }

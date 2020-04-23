@@ -3,8 +3,7 @@ public class PassengerThread extends Thread {
     private int seatNum;
     private int zoneNum;
     private int groupNum;
-    //    public static int c0Size = KioskClerkThread.c0Deque.size();
-//    public static int c1Size = KioskClerkThread.c1Deque.size();
+
     public int getTicketNum() {
         return seatNum;
     }
@@ -41,7 +40,7 @@ public class PassengerThread extends Thread {
     @Override
     public void run() {
         try {
-            sleep((long) (Math.random() *1000));
+            sleep((long) (Math.random() * 6 * Main.THIRTY_MIN));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -66,32 +65,27 @@ public class PassengerThread extends Thread {
             if (c0Size < c1Size) {
                 msg("Added zero queue");
                 KioskClerkThread.c0Deque.add(this);
-//                KioskClerkThread.c0Size.addAndGet(1);
             } else if (c0Size > c1Size) {
                 msg("Added to one queue");
                 KioskClerkThread.c1Deque.add(this);
-//                KioskClerkThread.c1Size.addAndGet(1);
-
             } else {
                 int randNum = (int) Math.round( Math.random());
 
                 if (randNum == 0) {
                     msg("Added to zero queue randomly");
                     KioskClerkThread.c0Deque.add(this);
-//                    KioskClerkThread.c0Size.addAndGet(1);
                 } else {
                     msg("Added to one queue randomly");
                     KioskClerkThread.c1Deque.add(this);
-//                    KioskClerkThread.c1Size.addAndGet(1);
                 }
             }
         } else {
             while (c0Size == Main.counterNum && c1Size == Main.counterNum) {
                 try {
                     msg("Busy wait to approach counter");
-                    sleep(2000);
+                    sleep(Main.THIRTY_MIN/10);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    //todo: Figure out what to put here
                 }
             }
         }
@@ -99,26 +93,65 @@ public class PassengerThread extends Thread {
 
     }
 
-
     private void goThroughSecurity() {
         msg("Rushing to security");
-        setPriority(getPriority() + 1);
+        int originalPriority = getPriority();
+        int higherPriority = originalPriority + 1;
+        setPriority(higherPriority);
         try {
-            sleep((long) (Math.random() * 3000));
+            sleep((long) (Math.random() * Main.THIRTY_MIN));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        setPriority(originalPriority);
+        msg("Arrived At Gate and adding to proper zone queues");
+        switch (this.getZoneNum()) {
+            case 1:
+                FlightAttendantThread.z1Queue.add(this);
+                FlightAttendantThread.atGateZ1Count.getAndAdd(1);
+                break;
+            case 2:
+                FlightAttendantThread.z2Queue.add(this);
+                FlightAttendantThread.atGateZ2Count.getAndAdd(1);
+                break;
+            default:
+                FlightAttendantThread.z3Queue.add(this);
+                FlightAttendantThread.atGateZ3Count.getAndAdd(1);
+                break;
+        }
 
-        setPriority(getPriority() -1);
-        msg("Arrived At Gate");
-        while (true) {
+        waitAtGate();
+
+    }
+
+    private void waitAtGate() {
+        while (!isInterrupted()) {
             try {
-                sleep((long) (Math.random() * 1000));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                sleep(Main.THIRTY_MIN/10);
+            }catch (InterruptedException e){
+                //todo: figure out what to put here
             }
         }
+        scanBoardingPass();
+
     }
+    private void scanBoardingPass() {
+        msg("Scanned boarding pass");
+        PassengerThread.yield();
+        PassengerThread.yield();
+        sleepOnPlane();
+    }
+
+    private void sleepOnPlane() {
+        try {
+            sleep(4 * Main.THIRTY_MIN);
+        } catch (InterruptedException e) {
+            //todo: Figure out what to put here
+        }
+    }
+
+
+
 }
 
 
