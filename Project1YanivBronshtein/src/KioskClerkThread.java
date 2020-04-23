@@ -3,25 +3,25 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class KioskClerkThread extends Thread {
     public static long time = System.currentTimeMillis();
-    public static Vector<PassengerThread> c0Deque = new Vector<>(Main.counterNum);
-    public static Vector<PassengerThread> c1Deque = new Vector<>(Main.counterNum);
+    public static Vector<PassengerThread> c1Queue = new Vector<>(Main.counterNum);
+    public static Vector<PassengerThread> c2Queue = new Vector<>(Main.counterNum);
     public static Vector<PassengerThread> waitDeque = new Vector<>();
     public static int totalNumberPassengersServed;
     private static int id;
-    private static ArrayList<Integer> randomNumbersList = new ArrayList<>();
+    private static Vector<Integer> randomNumbersList = new Vector<>(Main.numPassengers);
     public static AtomicInteger z1KioskCount = new AtomicInteger(0);
     public static AtomicInteger z2KioskCount = new AtomicInteger(0);
     public static AtomicInteger z3KioskCount = new AtomicInteger(0);
 
     public KioskClerkThread(int num) {
-        setName("KioskClerk-" + num);
+        setName("KioskClerk-" + (num + 1));
         id = num;
         totalNumberPassengersServed = 0;
         randomNumbersList = generateRandomNumbers();
     }
 
-    private ArrayList<Integer> generateRandomNumbers() {
-        ArrayList<Integer> list = new ArrayList<>();
+    private Vector<Integer> generateRandomNumbers() {
+        Vector<Integer> list = new Vector<>();
         for (int i = 1; i <= Main.numPassengers; i++) {
             list.add(i);
         }
@@ -37,25 +37,25 @@ public class KioskClerkThread extends Thread {
     public void run() {
         while (totalNumberPassengersServed < Main.numPassengers) {
             if (currentThread().getName().equals("KioskClerk-0")) {
-                if (!c0Deque.isEmpty()) {
-                    PassengerThread servedPassenger = c0Deque.remove(0);
+                if (!c1Queue.isEmpty()) {
+                    PassengerThread servedPassenger = c1Queue.remove(0);
                     assignTicket(servedPassenger);
                     totalNumberPassengersServed++;
 
                     if (!waitDeque.isEmpty()) {
-                        c0Deque.add(waitDeque.remove(0));
+                        c1Queue.add(waitDeque.remove(0));
                     }
                 } else {
                     continue;
                 }
             }
             if (currentThread().getName().equals("KioskClerk-1")) {
-                if (!c1Deque.isEmpty()) {
-                    PassengerThread servedPassenger = c1Deque.remove(0);
+                if (!c2Queue.isEmpty()) {
+                    PassengerThread servedPassenger = c2Queue.remove(0);
                     assignTicket(servedPassenger);
                     totalNumberPassengersServed++;
                     if (!waitDeque.isEmpty()) {
-                        c1Deque.add(waitDeque.remove(0));
+                        c2Queue.add(waitDeque.remove(0));
                     }
                 }
 

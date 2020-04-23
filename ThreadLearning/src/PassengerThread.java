@@ -104,7 +104,7 @@ public class PassengerThread extends Thread {
         msg("Rushing to security");
         setPriority(getPriority() + 1);
         try {
-            sleep((long) (Math.random() * 3000));
+            sleep((long) (Math.random() * 3* Main.));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

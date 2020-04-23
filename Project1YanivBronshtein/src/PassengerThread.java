@@ -39,48 +39,55 @@ public class PassengerThread extends Thread {
 
     @Override
     public void run() {
+        /* Each passenger arrives approximately three hours before the flight */
         try {
             sleep((long) (Math.random() * 6 * Main.THIRTY_MIN));
         } catch (InterruptedException e) {
-            e.printStackTrace();
+        //todo: Figure out what to put here
         }
         msg("Arrived at airport");
-        getBoardingPass();
+        getBoardingPassAtKiosk();
 
     }
 
 
 
-    private void getBoardingPass() {
-        int c0Size;
+    private void getBoardingPassAtKiosk() {
+        /* Number of passengers at the first Kiosk Clerk counter */
         int c1Size;
-        synchronized (KioskClerkThread.c0Deque) {
-            c0Size = KioskClerkThread.c0Deque.size();
+        /* Number of passengers at the second Kiosk Clerk counter */
+        int c2Size;
+
+        /* Get the current number of passenger at the first counter the Kiosk Clerk  */
+        synchronized (KioskClerkThread.c1Queue) {
+            c1Size = KioskClerkThread.c1Queue.size();
         }
-        synchronized (KioskClerkThread.c1Deque) {
-            c1Size = KioskClerkThread.c1Deque.size();
+        /* Get the current number of passenger at the second counter the Kiosk Clerk  */
+        synchronized (KioskClerkThread.c2Queue) {
+            c2Size = KioskClerkThread.c2Queue.size();
         }
-        System.out.println("c0Size: " + c0Size + "c1Size: " + c1Size);
-        if (c0Size < Main.counterNum && c1Size < Main.counterNum) {
-            if (c0Size < c1Size) {
+
+        /* If the number of passengers at both counters is below the threshold */
+        if (c1Size < Main.counterNum && c2Size < Main.counterNum) {
+            if (c1Size < c2Size) {
                 msg("Added zero queue");
-                KioskClerkThread.c0Deque.add(this);
-            } else if (c0Size > c1Size) {
+                KioskClerkThread.c1Queue.add(this);
+            } else if (c1Size > c2Size) {
                 msg("Added to one queue");
-                KioskClerkThread.c1Deque.add(this);
+                KioskClerkThread.c2Queue.add(this);
             } else {
                 int randNum = (int) Math.round( Math.random());
 
                 if (randNum == 0) {
                     msg("Added to zero queue randomly");
-                    KioskClerkThread.c0Deque.add(this);
+                    KioskClerkThread.c1Queue.add(this);
                 } else {
                     msg("Added to one queue randomly");
-                    KioskClerkThread.c1Deque.add(this);
+                    KioskClerkThread.c2Queue.add(this);
                 }
             }
         } else {
-            while (c0Size == Main.counterNum && c1Size == Main.counterNum) {
+            while (c1Size == Main.counterNum && c2Size == Main.counterNum) {
                 try {
                     msg("Busy wait to approach counter");
                     sleep(Main.THIRTY_MIN/10);
