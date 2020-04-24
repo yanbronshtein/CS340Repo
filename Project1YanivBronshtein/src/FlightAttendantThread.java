@@ -1,4 +1,3 @@
-import java.util.Comparator;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -21,8 +20,8 @@ public class FlightAttendantThread extends Thread {
     public static AtomicBoolean hasFinishedBoarding = new AtomicBoolean(false);
     /** This vector is used to contain passengers in their groups waiting to board the plane */
     Vector<PassengerThread> atDoorQueue = new Vector<>();
-    /** This vector is used to contain passengers boarding plane */
-    public static Vector<PassengerThread> boardingPlaneQueue = new Vector<>(Main.numPassengers / 3);
+    /** This vector is used to contain passengers that made it on the flight */
+    public static Vector<PassengerThread> planeQueue = new Vector<>(Main.numPassengers / 3);
     /** This vector holds the passengers in zone 1 */
     public static Vector<PassengerThread> z1Queue = new Vector<>(Main.numPassengers /3);
     /** This vector holds the passengers in zone 2 */
@@ -81,12 +80,12 @@ public class FlightAttendantThread extends Thread {
         try {
             sleep(4 * Main.THIRTY_MIN);
         } catch (InterruptedException e) {
-            msg("It is time for landing");
+            msg("All passengers aboard please ready yourself for landing");
             interrupt();
         }
 
-        /* Sort the */
-        boardingPlaneQueue.sort((passenger1, passenger2) -> {
+        /* Sort the planeQueue for help with disembarking plane */
+        planeQueue.sort((passenger1, passenger2) -> {
             if (passenger1.passengerInfo.get(2) < passenger2.passengerInfo.get(2)) {
                 return -1;
             }
@@ -99,6 +98,7 @@ public class FlightAttendantThread extends Thread {
             }
         });
         msg("Sorted successfully");
+
 
 
 
@@ -134,7 +134,7 @@ public class FlightAttendantThread extends Thread {
                 PassengerThread boardingPassenger = atDoorQueue.remove(0);
                 boardingPassenger.passengerInfo.set(3, groupID.get()); //Add groupID
                 boardingPassenger.interrupt(); //Interrupt to have them scan their boarding pass
-                boardingPlaneQueue.add(boardingPassenger);
+                planeQueue.add(boardingPassenger);
                 msg("Passenger " + boardingPassenger.passengerInfo.get(0) + " has boarded the plane with zone " +
                         boardingPassenger.passengerInfo.get(1) + " seat " + boardingPassenger.passengerInfo.get(2) +
                         " group ID " + boardingPassenger.passengerInfo.get(3));
@@ -161,5 +161,7 @@ public class FlightAttendantThread extends Thread {
             latePassenger.interrupt();
         }
     }
+
+    
 }
 

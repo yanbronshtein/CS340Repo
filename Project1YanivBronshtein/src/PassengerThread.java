@@ -44,6 +44,12 @@ public class PassengerThread extends Thread {
         /* Passenger goes to the kiosk to print their pass */
         getBoardingPassAtKiosk();
 
+        if (passengerInfo.get(3) == -1) {
+            msg("Missed his flight");
+        } else {
+            msg("It's vacation time!");
+        }
+
     }
 
 
@@ -191,11 +197,26 @@ public class PassengerThread extends Thread {
     private void sleepOnPlane() {
         msg("I am in sleepOnPlane() method");
         try {
-            sleep(4 * Main.THIRTY_MIN);
+            sleep(5 * Main.THIRTY_MIN);
         } catch (InterruptedException e) {
-            //todo: Figure out what to put here DO THIS TOMMMM!!
+            msg("Woken up by flight attendant for landing procedure");
+            interrupt();
+        }
+
+        waitToDepartPlane();
+    }
+
+    private void waitToDepartPlane() {
+        while (!isInterrupted()) {
+            try {
+                sleep(Main.THIRTY_MIN/10);
+            } catch (InterruptedException e) {
+                msg("Leaving plane");
+                interrupt();
+            }
         }
     }
+
 
 
 
