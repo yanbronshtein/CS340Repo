@@ -7,14 +7,21 @@ public class PassengerThread extends Thread {
      * passengerInfo.get(0): passenger id upon thread creation
      * passengerInfo.get(1): zone number on boarding pass
      * passengerInfo.get(2): seat number on boarding pass
-     * passengerInfo.get(3): group number when boarding the plane*/
-    public Vector<Integer> passengerInfo = new Vector<>(3);
+     * passengerInfo.get(3): group id when boarding the plane
+     * */
+    public final Vector<Integer> passengerInfo = new Vector<>(3);
     /** Time in thread upon creation */
     public static long time = System.currentTimeMillis();
+//    final int id;
     /** Constructor creates thread with unique name and id  */
-    public PassengerThread(int id) {
-        setName("Passenger-" + (id + 1));
-        passengerInfo.add(0, id);
+    public PassengerThread(int num) {
+        int id = num + 1;
+        setName("Passenger-" + id);
+        passengerInfo.add(0, id); //id of passenger
+        passengerInfo.add(1, -1);
+        passengerInfo.add(2, -1);
+        passengerInfo.add(3, -1);
+
     }
 
     /** This method is used to display messages by the thread onto the console including the current
@@ -138,32 +145,52 @@ public class PassengerThread extends Thread {
                 break;
         }
 
+
         /* The passenger will now enter a busy wait at the gate */
         waitAtGate();
 
     }
 
-    /** This method simulates the passenger waiting at the gate to be processed by the flight attendant */
+    /** This method simulates the passenger waiting at the gate to be processed by the flight attendant
+     * If the flight attendant has set the hasFinishedBoarding flag to true, and the passenger
+     * has exited the busy wait for that reason, then they were late and the thread should terminate naturally*/
     private void waitAtGate() {
+//        while (!FlightAttendantThread.hasFinishedBoarding.get() && passengerInfo.get(3) == -1) {
+//        while (!FlightAttendantThread.hasFinishedBoarding.get() && (passengerInfo.get(3) == -1)) {
         while (!isInterrupted()) {
+
+//            msg("I am in while loop in waitAtGateMethod() method");
             try {
-                sleep(Main.THIRTY_MIN/10);
+                sleep(Main.THIRTY_MIN/4);
             }catch (InterruptedException e){
-                //todo: figure out what to put here
+                msg("Called by flight attend to scan boarding pass");
+                interrupt();
             }
         }
+
+        scanBoardingPass();
+
+        if (passengerInfo.get(3) == -1) {
+            msg("Passenger " + passengerInfo.get(0) + " has boarded the plane with zone " +
+                    passengerInfo.get(1) + " seat " + passengerInfo.get(2) +
+                    " group ID " + passengerInfo.get(3));
+        }
+
+//        msg("I am in waitAtGateMethod() method");
+
+
         /* After getting interrupted by the flight attendant the passenger goes to scan their boarding pass
         * immediately prior to boarding the plane */
-        scanBoardingPass();
 
     }
 
     /** This method simulates the passenger scanning their boarding pass */
     private void scanBoardingPass() {
-        msg("Scanned boarding pass and boarded plane in group " + passengerInfo.get(3));
         /* Simulate scanning boarding pass by doing yield() twice */
         PassengerThread.yield();
         PassengerThread.yield();
+        msg("Scanned boarding pass and boarded plane in group " + passengerInfo.get(3));
+
 
         /* Passenger sleeps during flight */
         sleepOnPlane();
@@ -177,6 +204,7 @@ public class PassengerThread extends Thread {
         } catch (InterruptedException e) {
             //todo: Figure out what to put here
         }
+        msg("I am in sleepOnPlane() method");
     }
 
 

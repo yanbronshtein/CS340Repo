@@ -3,11 +3,11 @@ public class Main {
     public static KioskClerkThread[] clerks;
     public static PassengerThread[] passengers;
     public static FlightAttendantThread flightAttendant;
-    public static int numPassengers = 30;
+    public static int numPassengers = 2;
     public static int numClerks = 2;
     public static int counterNum = 3;
     public static int groupNum = 4;
-    public static final long THIRTY_MIN = 1000;
+    public static final long THIRTY_MIN = 2000;
     public static void main(String[] args) {
         //Create clock thread
         clock = new ClockThread(12*THIRTY_MIN);
@@ -40,15 +40,6 @@ public class Main {
 
         //Start flight attendant thread
         flightAttendant.start();
-
-
-
-
-
-
-
-
-
 
     }
 }

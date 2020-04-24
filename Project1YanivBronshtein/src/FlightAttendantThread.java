@@ -1,4 +1,5 @@
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /** This class simulates the behavior of the Flight Attendant in an airport
@@ -13,6 +14,10 @@ public class FlightAttendantThread extends Thread {
     public static AtomicInteger atGateZ2Count = new AtomicInteger(0);
     /** Variable used to count the number of passengers that passed security and were added to zone 3 queue */
     public static AtomicInteger atGateZ3Count = new AtomicInteger(0);
+    /** Variable to hold the group ID assigned by the flight attendant to passengers boarding the plane */
+    public static AtomicInteger groupID = new AtomicInteger(0);
+    /** Variable is set to true by the flight attendant as soon as they have announced that the plane doors have closed  */
+    public static AtomicBoolean hasFinishedBoarding = new AtomicBoolean(false);
     /** This vector is used to contain passengers in their groups waiting to board the plane */
     Vector<PassengerThread> atDoorQueue = new Vector<>();
     /** This vector is used to contain passengers boarding plane */
@@ -26,6 +31,8 @@ public class FlightAttendantThread extends Thread {
 
 
 
+
+
     public FlightAttendantThread() {
         setName("FlightAttendant-");
     }
@@ -36,11 +43,21 @@ public class FlightAttendantThread extends Thread {
 
     @Override
     public void run() {
-        while (!isInterrupted()) {
-            try {
-                sleep(100);
-            } catch (InterruptedException e) {
-                //todo: Figure out what to put here
+        msg("Started run method ");
+//        while (!ClockThread.isBoardingTime.get()) {
+//            try {
+//                sleep(200);
+//            } catch (InterruptedException e) {
+//                msg("Interrupted by the clock. Time for boarding");
+//            }
+//        }
+
+
+        while(!isInterrupted()){
+            try{
+                sleep(200);
+            }catch(InterruptedException e){
+                interrupt(); // propagate interrupt
             }
         }
         handleBoardingZone(z1Queue, Main.THIRTY_MIN/4);
@@ -49,25 +66,36 @@ public class FlightAttendantThread extends Thread {
         handleBoardingZone(z1Queue, Main.THIRTY_MIN/20);
         handleBoardingZone(z2Queue, Main.THIRTY_MIN/20);
         handleBoardingZone(z3Queue, Main.THIRTY_MIN/20);
+
+        hasFinishedBoarding.set(true);
         msg("Doors of plane are closed. Please rebook your flight at this time");
+
     }
 
 
 
-    public void handleBoardingZone(Vector<PassengerThread> queue, long allowedTime) {
-        long start = System.currentTimeMillis(); //Get current time
-        long timeForCallingZone = start + allowedTime; // 60 seconds * 1000 ms/sec
+    public void handleBoardingZone(Vector<PassengerThread> zoneQueue, long allowedTime) {
 
-        while (System.currentTimeMillis() < timeForCallingZone && !queue.isEmpty()) {
-            PassengerThread temp = queue.remove(0);
+        msg("Size of zoneQueue" + zoneQueue.size());
+        long start = System.currentTimeMillis(); //Get current time
+        long timeAllottedForCallingZone = start + allowedTime; // 60 seconds * 1000 ms/sec
+
+        while (System.currentTimeMillis() < timeAllottedForCallingZone && !zoneQueue.isEmpty()) {
+            PassengerThread temp = zoneQueue.remove(0);
+            temp.interrupt();
             atDoorQueue.add(temp);
         }
         while (!atDoorQueue.isEmpty()) {
             int i = Main.counterNum;
-            while (i >= 0 && !atDoorQueue.isEmpty()) {
+            groupID.getAndAdd(1);
+            while (i > 0 && !atDoorQueue.isEmpty()) {
                 PassengerThread boardingPassenger = atDoorQueue.remove(0);
-                boardingPassenger.interrupt(); //Interrupt to have them scan their ticket
+                boardingPassenger.passengerInfo.set(3, groupID.get()); //Add group
+                boardingPassenger.interrupt(); //Interrupt to have them scan their boarding pass
                 boardingPlaneQueue.add(boardingPassenger);
+                msg("Passenger " + boardingPassenger.passengerInfo.get(0) + " has boarded the plane with zone " +
+                        boardingPassenger.passengerInfo.get(1) + " seat " + boardingPassenger.passengerInfo.get(2) +
+                        " group ID " + boardingPassenger.passengerInfo.get(3));
                 i--;
             }
         }

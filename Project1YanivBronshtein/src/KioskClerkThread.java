@@ -8,10 +8,10 @@ public class KioskClerkThread extends Thread {
     /** Time in thread at creation */
     public static long time = System.currentTimeMillis();
 
-    public static Vector<PassengerThread> c1Queue = new Vector<>(Main.counterNum);
-    public static Vector<PassengerThread> c2Queue = new Vector<>(Main.counterNum);
+    public static final Vector<PassengerThread> c1Queue = new Vector<>(Main.counterNum);
+    public static final Vector<PassengerThread> c2Queue = new Vector<>(Main.counterNum);
     public static int totalNumberPassengersServed;
-    private int id;
+    final int id;
     private static Vector<Integer> randomNumbersList = new Vector<>(Main.numPassengers);
     public static AtomicInteger z1KioskCount = new AtomicInteger(0);
     public static AtomicInteger z2KioskCount = new AtomicInteger(0);
@@ -56,7 +56,7 @@ public class KioskClerkThread extends Thread {
                 }
             }
         }
-        msg("All passengers at counter " + id + " have been served. Done for the day");
+        msg("All passengers at counter " + id + " have been served. Thread Terminating");
     }
 
     private void assignTicket(PassengerThread servedPassenger) {
@@ -74,8 +74,8 @@ public class KioskClerkThread extends Thread {
             zoneNum = 3;
             z3KioskCount.getAndAdd(1);
         }
-        servedPassenger.passengerInfo.add(1, zoneNum);
-        servedPassenger.passengerInfo.add(2, seatNum);
+        servedPassenger.passengerInfo.set(1, zoneNum);
+        servedPassenger.passengerInfo.set(2, seatNum);
         msg(servedPassenger.getName() + ": is in seat " + seatNum + " and zone " + zoneNum);
     }
 }

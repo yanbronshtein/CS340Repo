@@ -1,4 +1,6 @@
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /** This class simulates the behavior of the System clock that is meant to control the behavior of the flight attendant
  *  and interrupt any blocked threads at the end of the program
  * @author Yaniv Bronshtein
@@ -8,6 +10,8 @@ public class ClockThread extends Thread {
     public static long time = System.currentTimeMillis();
     /** Specifies the total time given for the program to run in milliseconds */
     private static long totalTime;
+
+    public static AtomicBoolean isBoardingTime = new AtomicBoolean(false);
 
 
     public ClockThread(long time) {
@@ -29,8 +33,12 @@ public class ClockThread extends Thread {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+
         //Notify flight attendant that it is time to board
-        Main.flightAttendant.interrupt();
+        if (Main.flightAttendant.isAlive()) {
+            Main.flightAttendant.interrupt();
+        }
 
         //Sleep for the duration of the flight up till the flight attend is to announce that
         // the plane is preparing for landing
@@ -47,7 +55,9 @@ public class ClockThread extends Thread {
 
 
         msg("All passengers have disembarked. Clock terminating");
-
+        for (PassengerThread passenger : Main.passengers) {
+            passenger.interrupt();
+        }
 
     }
 }
