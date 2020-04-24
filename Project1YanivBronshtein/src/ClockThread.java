@@ -13,12 +13,16 @@ public class ClockThread extends Thread {
 
     public static AtomicBoolean isBoardingTime = new AtomicBoolean(false);
 
-
+    /** Constructs the ClockThread
+     * @param time total time given for this program in milliseconds */
     public ClockThread(long time) {
         setName("Clock-");
         totalTime = time;
     }
 
+    /** This method is used to display messages by the thread onto the console including the current
+     * time and thread name followed by the message
+     * @param m message by the thread */
     public void msg(String m) {
         System.out.println("[" + (System.currentTimeMillis() - time) + "]" + getName() + ":" + m);
     }

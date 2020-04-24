@@ -70,31 +70,31 @@ public class PassengerThread extends Thread {
         * If both lines have the same number of passengers, randomly pick a line to place the passenger*/
         if (c1Size < Main.counterNum && c2Size < Main.counterNum) {
             if (c1Size < c2Size) {
-                msg("Added to first queue");
+//                msg("Added to first queue");
                 KioskClerkThread.c1Queue.add(this);
             } else if (c1Size > c2Size) {
-                msg("Added to second queue");
+//                msg("Added to second queue");
                 KioskClerkThread.c2Queue.add(this);
             } else {
                 int randNum = (int) Math.round( Math.random());
 
                 if (randNum == 0) {
-                    msg("Added to first queue randomly");
+//                    msg("Added to first queue randomly");
                     KioskClerkThread.c1Queue.add(this);
                 } else {
-                    msg("Added to second queue randomly");
+//                    msg("Added to second queue randomly");
                     KioskClerkThread.c2Queue.add(this);
                 }
             }
         }
         /* If the second counter is full and the first is not, add the passenger to the first counter */
         else if (c1Size < Main.counterNum && c2Size == Main.counterNum) {
-            msg("Adding to first queue because second queue is full ");
+//            msg("Added to first queue because second queue was full ");
             KioskClerkThread.c1Queue.add(this);
         }
         /* If the first counter is full and the second is not, add the passenger to the second counter */
         else if (c1Size == Main.counterNum && c2Size < Main.counterNum) {
-            msg("Adding to second queue because first queue is full ");
+//            msg("Adding to second queue because first queue is full ");
             KioskClerkThread.c2Queue.add(this);
         }
         /* If both counters are at max capacity, passenger enters busy loop  */
@@ -128,7 +128,7 @@ public class PassengerThread extends Thread {
         }
         setPriority(getPriority() - 1);
 
-        msg("Left security and added to proper zone queue");
+//        msg("Left security and added to proper zone queue");
         /* Passenger enters is placed in one of 3 zone queues based on their passenger info  */
         switch (passengerInfo.get(1)) {
             case 1:
@@ -171,11 +171,11 @@ public class PassengerThread extends Thread {
          * immediately prior to boarding the plane */
         scanBoardingPass();
 
-        if (passengerInfo.get(3) == -1) {
-            msg("Passenger " + passengerInfo.get(0) + " has boarded the plane with zone " +
-                    passengerInfo.get(1) + " seat " + passengerInfo.get(2) +
-                    " group ID " + passengerInfo.get(3));
-        }
+//        if (passengerInfo.get(3) == -1) {
+//            msg("Passenger " + passengerInfo.get(0) + " has boarded the plane with zone " +
+//                    passengerInfo.get(1) + " seat " + passengerInfo.get(2) +
+//                    " group ID " + passengerInfo.get(3));
+//        }
     }
 
     /** This method simulates the passenger scanning their boarding pass */
@@ -193,12 +193,12 @@ public class PassengerThread extends Thread {
     /** This method simulates the passenger sleeping on the plane for two hours until
      * being woken by the flight attendant to signal preparation for landing */
     private void sleepOnPlane() {
+        msg("I am in sleepOnPlane() method");
         try {
             sleep(4 * Main.THIRTY_MIN);
         } catch (InterruptedException e) {
             //todo: Figure out what to put here DO THIS TOMMMM!!
         }
-        msg("I am in sleepOnPlane() method");
     }
 
 
