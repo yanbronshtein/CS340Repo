@@ -86,7 +86,7 @@ public class FlightAttendantThread extends Thread {
             atDoorQueue.add(temp);
         }
         while (!atDoorQueue.isEmpty()) {
-            int i = Main.counterNum;
+            int i = Main.groupNum;
             groupID.getAndAdd(1);
             while (i > 0 && !atDoorQueue.isEmpty()) {
                 PassengerThread boardingPassenger = atDoorQueue.remove(0);

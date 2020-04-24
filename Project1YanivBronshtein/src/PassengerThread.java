@@ -12,7 +12,7 @@ public class PassengerThread extends Thread {
     public final Vector<Integer> passengerInfo = new Vector<>(3);
     /** Time in thread upon creation */
     public static long time = System.currentTimeMillis();
-//    final int id;
+
     /** Constructor creates thread with unique name and id  */
     public PassengerThread(int num) {
         int id = num + 1;
@@ -167,7 +167,8 @@ public class PassengerThread extends Thread {
                 interrupt();
             }
         }
-
+        /* After getting interrupted by the flight attendant the passenger goes to scan their boarding pass
+         * immediately prior to boarding the plane */
         scanBoardingPass();
 
         if (passengerInfo.get(3) == -1) {
@@ -175,13 +176,6 @@ public class PassengerThread extends Thread {
                     passengerInfo.get(1) + " seat " + passengerInfo.get(2) +
                     " group ID " + passengerInfo.get(3));
         }
-
-//        msg("I am in waitAtGateMethod() method");
-
-
-        /* After getting interrupted by the flight attendant the passenger goes to scan their boarding pass
-        * immediately prior to boarding the plane */
-
     }
 
     /** This method simulates the passenger scanning their boarding pass */
@@ -202,7 +196,7 @@ public class PassengerThread extends Thread {
         try {
             sleep(4 * Main.THIRTY_MIN);
         } catch (InterruptedException e) {
-            //todo: Figure out what to put here
+            //todo: Figure out what to put here DO THIS TOMMMM!!
         }
         msg("I am in sleepOnPlane() method");
     }

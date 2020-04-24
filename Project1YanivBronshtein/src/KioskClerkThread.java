@@ -7,16 +7,24 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class KioskClerkThread extends Thread {
     /** Time in thread at creation */
     public static long time = System.currentTimeMillis();
-
+    /** Vector that holds the passengers for the first kiosk counter */
     public static final Vector<PassengerThread> c1Queue = new Vector<>(Main.counterNum);
+    /** Vector that holds the passengers for the second kiosk counter */
     public static final Vector<PassengerThread> c2Queue = new Vector<>(Main.counterNum);
+    /** Total number of passengers served by both clerks */
     public static int totalNumberPassengersServed;
+    /** ID of KioskClerkThread */
     final int id;
-    private static Vector<Integer> randomNumbersList = new Vector<>(Main.numPassengers);
+    /** Vector that contains a list of randomized seat numbers */
+    private static Vector<Integer> randomNumbersList = new Vector<>(30);
+    /** Number of passengers belonging to zone 1 processed by kiosk clerk */
     public static AtomicInteger z1KioskCount = new AtomicInteger(0);
+    /** Number of passengers belonging to zone 2 processed by kiosk clerk */
     public static AtomicInteger z2KioskCount = new AtomicInteger(0);
+    /** Number of passengers belonging to zone 3 processed by kiosk clerk */
     public static AtomicInteger z3KioskCount = new AtomicInteger(0);
 
+    /**  */
     public KioskClerkThread(int num) {
         id = num + 1;
         setName("KioskClerk-" + id);
@@ -26,7 +34,7 @@ public class KioskClerkThread extends Thread {
 
     private Vector<Integer> generateRandomNumbers() {
         Vector<Integer> list = new Vector<>();
-        for (int i = 1; i <= Main.numPassengers; i++) {
+        for (int i = 1; i <= 30; i++) {
             list.add(i);
         }
         Collections.shuffle(list);
@@ -39,7 +47,9 @@ public class KioskClerkThread extends Thread {
     @Override
     public void run() {
         while (totalNumberPassengersServed < Main.numPassengers) {
-            if (currentThread().getName().equals("KioskClerk-1")) {
+//            if (currentThread().getName().equals("KioskClerk-1")) {
+            if (id == 1) {
+
                 if (!c1Queue.isEmpty()) {
                     PassengerThread servedPassenger = c1Queue.remove(0);
                     assignTicket(servedPassenger);
@@ -48,7 +58,8 @@ public class KioskClerkThread extends Thread {
                     continue;
                 }
             }
-            if (currentThread().getName().equals("KioskClerk-2")) {
+//            if (currentThread().getName().equals("KioskClerk-2")) {
+            if (id == 2) {
                 if (!c2Queue.isEmpty()) {
                     PassengerThread servedPassenger = c2Queue.remove(0);
                     assignTicket(servedPassenger);
