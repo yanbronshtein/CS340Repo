@@ -23,7 +23,7 @@ public class Main {
             passengers[i] = new PassengerThread(i);
         }
         //Create Flight attendant thread
-        flightAttendant = new FlightAttendantThread(0);
+        flightAttendant = new FlightAttendantThread();
 
         //Start clock thread
         clock.start();

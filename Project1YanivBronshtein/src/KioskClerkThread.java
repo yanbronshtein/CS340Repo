@@ -1,11 +1,15 @@
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
+/** This class simulates the behavior of the Kiosk Clerk in an airport
+ * @author Yaniv Bronshtein
+ * @version 1.0
+ * */
 public class KioskClerkThread extends Thread {
+    /** Time in thread at creation */
     public static long time = System.currentTimeMillis();
+    
     public static Vector<PassengerThread> c1Queue = new Vector<>(Main.counterNum);
     public static Vector<PassengerThread> c2Queue = new Vector<>(Main.counterNum);
-    public static Vector<PassengerThread> waitDeque = new Vector<>();
     public static int totalNumberPassengersServed;
     private static int id;
     private static Vector<Integer> randomNumbersList = new Vector<>(Main.numPassengers);
@@ -32,37 +36,27 @@ public class KioskClerkThread extends Thread {
         System.out.println("[" + (System.currentTimeMillis() - time) + "]" + getName() + ":" + m);
     }
 
-
     @Override
     public void run() {
         while (totalNumberPassengersServed < Main.numPassengers) {
-            if (currentThread().getName().equals("KioskClerk-0")) {
+            if (currentThread().getName().equals("KioskClerk-1")) {
                 if (!c1Queue.isEmpty()) {
                     PassengerThread servedPassenger = c1Queue.remove(0);
                     assignTicket(servedPassenger);
                     totalNumberPassengersServed++;
-
-                    if (!waitDeque.isEmpty()) {
-                        c1Queue.add(waitDeque.remove(0));
-                    }
                 } else {
                     continue;
                 }
             }
-            if (currentThread().getName().equals("KioskClerk-1")) {
+            if (currentThread().getName().equals("KioskClerk-2")) {
                 if (!c2Queue.isEmpty()) {
                     PassengerThread servedPassenger = c2Queue.remove(0);
                     assignTicket(servedPassenger);
                     totalNumberPassengersServed++;
-                    if (!waitDeque.isEmpty()) {
-                        c2Queue.add(waitDeque.remove(0));
-                    }
                 }
-
             }
         }
-        msg("All passengers have been served. Check-in clerks done for the day");
-
+        msg("All passengers at counter " + id + " have been served. Done for the day");
     }
 
     private void assignTicket(PassengerThread servedPassenger) {
@@ -71,28 +65,17 @@ public class KioskClerkThread extends Thread {
         if (seatNum >= 0 && seatNum <= 10) {
             zoneNum = 1;
             z1KioskCount.getAndAdd(1);
-//            FlightAttendantThread.zone1Count.addAndGet(1);
-//            FlightAttendantThread.zone1Queue.add(servedPassenger);
         }
         else if (seatNum >= 11 && seatNum <= 20) {
             zoneNum = 2;
-
             z2KioskCount.getAndAdd(1);
-//            FlightAttendantThread.zone2Count.addAndGet(1);
-
-//            FlightAttendantThread.zone2Queue.add(servedPassenger);
         }
         else {
             zoneNum = 3;
             z3KioskCount.getAndAdd(1);
-
-//            FlightAttendantThread.zone3Count.addAndGet(1);
-
-//            FlightAttendantThread.zone3Queue.add(servedPassenger);
-
         }
-        servedPassenger.setZoneNum(zoneNum);
-        servedPassenger.setTicketNum(seatNum);
+        servedPassenger.passengerInfo.set(1, zoneNum);
+        servedPassenger.passengerInfo.set(2, seatNum);
         msg(servedPassenger.getName() + ": is in seat " + seatNum + " and zone " + zoneNum);
     }
 }

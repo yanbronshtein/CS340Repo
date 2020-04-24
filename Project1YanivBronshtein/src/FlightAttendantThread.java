@@ -1,29 +1,33 @@
-import java.util.TimerTask;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
+/** This class simulates the behavior of the Flight Attendant in an airport
+ * @author Yaniv Bronshtein
+ * @version 1.0*/
 public class FlightAttendantThread extends Thread {
-
+    /** Time recorded by each FlightAttendantThread upon creation */
+    public static long time = System.currentTimeMillis();
+    /** Variable used to count the number of passengers that passed security and were added to zone 1 queue */
     public static AtomicInteger atGateZ1Count = new AtomicInteger(0);
+    /** Variable used to count the number of passengers that passed security and were added to zone 2 queue */
     public static AtomicInteger atGateZ2Count = new AtomicInteger(0);
+    /** Variable used to count the number of passengers that passed security and were added to zone 3 queue */
     public static AtomicInteger atGateZ3Count = new AtomicInteger(0);
-    public static long THRESHOLD_TIME = 9*Main.THIRTY_MIN / 10; //Time after which we close the gates(3 min till departure)
-
+    /** This vector is used to contain passengers in their groups waiting to board the plane */
     Vector<PassengerThread> atDoorQueue = new Vector<>();
-
+    /** This vector is used to contain passengers boarding plane */
     public static Vector<PassengerThread> boardingPlaneQueue = new Vector<>(Main.numPassengers / 3);
-    //    public static Vector<PassengerThread> othersQueue = new Vector<>(Main.numPassengers);
-//    public static Vector<PassengerThread> waitingAtGateQueue = new Vector<>(Main.numPassengers);
+    /** This vector holds the passengers in zone 1 */
     public static Vector<PassengerThread> z1Queue = new Vector<>(Main.numPassengers /3);
+    /** This vector holds the passengers in zone 2 */
     public static Vector<PassengerThread> z2Queue = new Vector<>(Main.numPassengers /3);
+    /** This vector holds the passengers in zone 3 */
     public static Vector<PassengerThread> z3Queue = new Vector<>(Main.numPassengers /3);
 
-    public static long time = System.currentTimeMillis();
 
 
-    public FlightAttendantThread(int id) {
-        setName("FlightAttendant-" + id);
+    public FlightAttendantThread() {
+        setName("FlightAttendant-");
     }
 
     public void msg(String m) {

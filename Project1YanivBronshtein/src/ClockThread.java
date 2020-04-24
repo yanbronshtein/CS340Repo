@@ -1,13 +1,18 @@
 import java.util.concurrent.ThreadLocalRandom;
-
+/** This class simulates the behavior of the System clock that is meant to control the behavior of the flight attendant
+ *  and interrupt any blocked threads at the end of the program
+ * @author Yaniv Bronshtein
+ * @version 1.0*/
 public class ClockThread extends Thread {
-
-
+    /** Specifies the current time in the thread */
     public static long time = System.currentTimeMillis();
-    private long totalTime;
-    public ClockThread(long totalTime) {
+    /** Specifies the total time given for the program to run in milliseconds */
+    private static long totalTime;
+
+
+    public ClockThread(long time) {
         setName("Clock-");
-        this.totalTime = totalTime;
+        totalTime = time;
     }
 
     public void msg(String m) {
