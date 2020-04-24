@@ -7,19 +7,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class KioskClerkThread extends Thread {
     /** Time in thread at creation */
     public static long time = System.currentTimeMillis();
-    
+
     public static Vector<PassengerThread> c1Queue = new Vector<>(Main.counterNum);
     public static Vector<PassengerThread> c2Queue = new Vector<>(Main.counterNum);
     public static int totalNumberPassengersServed;
-    private static int id;
+    private int id;
     private static Vector<Integer> randomNumbersList = new Vector<>(Main.numPassengers);
     public static AtomicInteger z1KioskCount = new AtomicInteger(0);
     public static AtomicInteger z2KioskCount = new AtomicInteger(0);
     public static AtomicInteger z3KioskCount = new AtomicInteger(0);
 
     public KioskClerkThread(int num) {
-        setName("KioskClerk-" + (num + 1));
-        id = num;
+        id = num + 1;
+        setName("KioskClerk-" + id);
         totalNumberPassengersServed = 0;
         randomNumbersList = generateRandomNumbers();
     }
@@ -74,8 +74,8 @@ public class KioskClerkThread extends Thread {
             zoneNum = 3;
             z3KioskCount.getAndAdd(1);
         }
-        servedPassenger.passengerInfo.set(1, zoneNum);
-        servedPassenger.passengerInfo.set(2, seatNum);
+        servedPassenger.passengerInfo.add(1, zoneNum);
+        servedPassenger.passengerInfo.add(2, seatNum);
         msg(servedPassenger.getName() + ": is in seat " + seatNum + " and zone " + zoneNum);
     }
 }

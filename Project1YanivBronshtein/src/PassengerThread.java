@@ -14,6 +14,7 @@ public class PassengerThread extends Thread {
     /** Constructor creates thread with unique name and id  */
     public PassengerThread(int id) {
         setName("Passenger-" + (id + 1));
+        passengerInfo.add(0, id);
     }
 
     /** This method is used to display messages by the thread onto the console including the current
