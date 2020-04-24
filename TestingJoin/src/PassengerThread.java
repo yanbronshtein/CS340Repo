@@ -1,4 +1,5 @@
 import java.util.Vector;
+
 /** This class simulates the behavior of the passenger thread
  * @author Yaniv Bronshtein
  * @version 1.0*/
@@ -155,9 +156,13 @@ public class PassengerThread extends Thread {
      * If the flight attendant has set the hasFinishedBoarding flag to true, and the passenger
      * has exited the busy wait for that reason, then they were late and the thread should terminate naturally*/
     private void waitAtGate() {
+//        while (!FlightAttendantThread.hasFinishedBoarding.get() && passengerInfo.get(3) == -1) {
+//        while (!FlightAttendantThread.hasFinishedBoarding.get() && (passengerInfo.get(3) == -1)) {
         while (!isInterrupted()) {
+
+//            msg("I am in while loop in waitAtGateMethod() method");
             try {
-                sleep(Main.THIRTY_MIN/10);
+                sleep(Main.THIRTY_MIN/4);
             }catch (InterruptedException e){
                 msg("Called by flight attend to scan boarding pass");
                 interrupt();

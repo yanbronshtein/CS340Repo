@@ -1,4 +1,3 @@
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /** This class simulates the behavior of the System clock that is meant to control the behavior of the flight attendant
@@ -33,7 +32,7 @@ public class ClockThread extends Thread {
     public void run() {
         // Sleep for 2.5 hours
         try {
-            sleep(5*Main.THIRTY_MIN);
+            sleep(5* Main.THIRTY_MIN);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -44,9 +43,10 @@ public class ClockThread extends Thread {
             Main.flightAttendant.interrupt();
         }
 
-        //Sleep 2.5 hours( half an hour for boarding process and 2 hours until it is time for landing
+        //Sleep for the duration of the flight up till the flight attend is to announce that
+        // the plane is preparing for landing
         try {
-            sleep(5*Main.THIRTY_MIN);
+            sleep(4* Main.THIRTY_MIN);
         }catch (InterruptedException e) {
             e.printStackTrace();
         }

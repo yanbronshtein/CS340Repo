@@ -1,4 +1,3 @@
-import java.util.Comparator;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -30,8 +29,6 @@ public class FlightAttendantThread extends Thread {
     /** This vector holds the passengers in zone 3 */
     public static Vector<PassengerThread> z3Queue = new Vector<>(Main.numPassengers /3);
 
-    /** This vector holds the passengers from all zones that missed boarding */
-    public static Vector<PassengerThread> missedBoardingQueue = new Vector<>();
 
     /** Constructs a FlightAttendantThread and sets its name */
     public FlightAttendantThread() {
@@ -72,39 +69,11 @@ public class FlightAttendantThread extends Thread {
         handleBoardingZone(z3Queue, Main.THIRTY_MIN/20);
 
         /*Flight Attendant has closed the doors */
+
         hasFinishedBoarding.set(true);
         msg("Doors of plane are closed. Please rebook your flight at this time");
-        /* Flight attendant interrupts all passengers that have passed to security but missed boarding */
-        sendLatePassengersHome();
-
-        /* Flight attendant either wakes up on their own or most likely by the clock */
-        try {
-            sleep(4 * Main.THIRTY_MIN);
-        } catch (InterruptedException e) {
-            msg("It is time for landing");
-            interrupt();
-        }
-
-        /* Sort the */
-        boardingPlaneQueue.sort((passenger1, passenger2) -> {
-            if (passenger1.passengerInfo.get(2) < passenger2.passengerInfo.get(2)) {
-                return -1;
-            }
-            else if (passenger1.passengerInfo.get(2) > passenger2.passengerInfo.get(2)) {
-                return 1;
-            }
-            else {
-                msg("Improper generation of unique tickets. Flight overbooked");
-                return 0;
-            }
-        });
-        msg("Sorted successfully");
-
-
-
 
     }
-
 
 
     /** This method is used by the flight attendant to board passengers onto the plane
@@ -140,25 +109,6 @@ public class FlightAttendantThread extends Thread {
                         " group ID " + boardingPassenger.passengerInfo.get(3));
                 i--;
             }
-        }
-    }
-
-    /** This method goes through each of the queues removing any passengers and waking them up to go home and
-     * rebook their tickets */
-    public void sendLatePassengersHome() {
-        while (!z1Queue.isEmpty()) {
-            PassengerThread latePassenger = z1Queue.remove(0);
-            latePassenger.interrupt();
-        }
-
-        while (!z2Queue.isEmpty()) {
-            PassengerThread latePassenger = z2Queue.remove(0);
-            latePassenger.interrupt();
-        }
-
-        while (!z3Queue.isEmpty()) {
-            PassengerThread latePassenger = z3Queue.remove(0);
-            latePassenger.interrupt();
         }
     }
 }
