@@ -82,7 +82,18 @@ public class FlightAttendantThread extends Thread {
         hasFinishedBoarding.set(true);
 // TMP COMMENT:       msg("Doors of plane are closed. Please rebook your flight at this time");
         /* Flight attendant interrupts all passengers that have passed to security but missed boarding */
-        sendLatePassengersHome();
+        while (true) {
+            if (ClockThread.isBoardingTimeOver.get()) {
+                sendLatePassengersHome();
+                break;
+            }
+//            try {
+//                sleep(10);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+        }
+
 
         /* Flight attendant either wakes up on their own or most likely by the clock */
         try {
@@ -175,6 +186,13 @@ public class FlightAttendantThread extends Thread {
     /** This method goes through each of the queues removing any passengers and waking them up to go home and
      * rebook their tickets */
     public void sendLatePassengersHome() {
+
+        for (PassengerThread passenger : Main.passengers) {
+            if (passenger.passengerInfo.get(3) == -1) {
+                msg("Passenger with id " + passenger.passengerInfo.get(0) + " was late. Rebook flight and go home");
+                passenger.interrupt();
+            }
+        }
         while (!z1Queue.isEmpty()) {
             PassengerThread latePassenger = z1Queue.remove(0);
             latePassenger.interrupt();

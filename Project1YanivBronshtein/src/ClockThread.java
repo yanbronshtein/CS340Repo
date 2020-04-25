@@ -11,7 +11,7 @@ public class ClockThread extends Thread {
     /** Specifies the total time given for the program to run in milliseconds */
     private static long totalTime;
 
-    public static AtomicBoolean isBoardingTime = new AtomicBoolean(false);
+    public static AtomicBoolean isBoardingTimeOver = new AtomicBoolean(false);
 
     /** Constructs the ClockThread
      * @param time total time given for this program in milliseconds */
@@ -43,9 +43,16 @@ public class ClockThread extends Thread {
             Main.flightAttendant.interrupt();
         }
 
+        //Sleep for boarding time
+        try {
+            sleep(Main.THIRTY_MIN);
+        }catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
+        isBoardingTimeOver.set(true);
 
-        //Sleep 2.5 hours( half an hour for boarding process and 2 hours until it is time for landing
+        //Sleep 2 hours until it is time for landing
         try {
             sleep(5*Main.THIRTY_MIN);
         }catch (InterruptedException e) {
@@ -55,13 +62,15 @@ public class ClockThread extends Thread {
         //todo: Add code to signal passengers terminating
 
 
-
-
-
-        msg("Clock terminating");
+        msg("Time to interrupt late passengers");
+        /* Terminate all passengers who have not been given a group id */
 //        for (PassengerThread passenger : Main.passengers) {
+//
 //            passenger.interrupt();
 //        }
+
+        msg("Clock terminating");
+
 
     }
 }
