@@ -13,7 +13,7 @@ public class KioskClerkThread extends Thread {
     public static final Vector<PassengerThread> c2Queue = new Vector<>(Main.counterNum);
     /** Total number of passengers served by both clerks */
 //    public static int totalNumberPassengersServed;
-    public static AtomicInteger totalNumPassengersServed = new AtomicInteger(0);
+    public static AtomicInteger totalNumberPassengersServed = new AtomicInteger(0);
     /** ID of KioskClerkThread */
     final int id;
     /** Vector that contains a list of randomized seat numbers */
@@ -24,10 +24,6 @@ public class KioskClerkThread extends Thread {
     public static AtomicInteger z2KioskCount = new AtomicInteger(0);
     /** Number of passengers belonging to zone 3 processed by kiosk clerk */
     public static AtomicInteger z3KioskCount = new AtomicInteger(0);
-    /** Counter of passengers waiting on line at the first counter */
-    public static AtomicInteger c1Size = new AtomicInteger(0);
-    /** Counter of passengers waiting on line at the second counter */
-    public static AtomicInteger c2Size = new AtomicInteger(0);
 
     /** Constructor creates a KioskClerkThread. the name of the thread is initialized as well the totalNumPassengersServed.
      * The generateRandomNumbers() function is called to generateRandomNumbers for boarding pass seat numbers
@@ -48,7 +44,6 @@ public class KioskClerkThread extends Thread {
         return vec;
     }
 
-
     /** This method is used to display messages by the thread onto the console including the current
      * time and thread name followed by the message
      * @param m message by the thread */
@@ -66,18 +61,16 @@ public class KioskClerkThread extends Thread {
          * if the id is 2 and the second queue is not empty passengers are removed from there
          * In both cases, the assignBoardingPass() method is called on the passengers
          * and the totalNumberPassengersServed is incremented   */
-        while (totalNumPassengersServed.get() < Main.numPassengers) {
+        while (totalNumberPassengersServed.get() < Main.numPassengers) {
             if (id == 1 && !c1Queue.isEmpty()) {
                 PassengerThread servedPassenger = c1Queue.remove(0);
-                c1Size.getAndDecrement();
                 assignBoardingPass(servedPassenger);
-                totalNumPassengersServed.getAndIncrement();
+                totalNumberPassengersServed.getAndAdd(1);
             }
             if (id == 2 && !c2Queue.isEmpty()) {
                 PassengerThread servedPassenger = c2Queue.remove(0);
-                c2Size.getAndDecrement();
                 assignBoardingPass(servedPassenger);
-                totalNumPassengersServed.getAndIncrement();
+                totalNumberPassengersServed.getAndAdd(1);
             }
         }
         /* As soon as the while loop is exited, the clerks are done for the day */
@@ -96,15 +89,15 @@ public class KioskClerkThread extends Thread {
         int zoneNum;
         if (seatNum >= 0 && seatNum <= 10) {
             zoneNum = 1;
-            z1KioskCount.getAndIncrement();
+            z1KioskCount.getAndAdd(1);
         }
         else if (seatNum >= 11 && seatNum <= 20) {
             zoneNum = 2;
-            z2KioskCount.getAndIncrement();
+            z2KioskCount.getAndAdd(1);
         }
         else {
             zoneNum = 3;
-            z3KioskCount.getAndIncrement();
+            z3KioskCount.getAndAdd(1);
         }
 
         /* Update the passenger info vector in the PassengerThread (position 1: zoneNum, position 2: seatNum) */
