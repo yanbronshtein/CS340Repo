@@ -40,7 +40,7 @@ public class PassengerThread extends Thread {
         } catch (InterruptedException e) {
         //todo: Figure out what to put here
         }
-        msg("Arrived at airport");
+//  TMP COMMENT:      msg("Arrived at airport");
         /* Passenger goes to the kiosk to print their pass */
         getBoardingPassAtKiosk();
 
@@ -107,8 +107,8 @@ public class PassengerThread extends Thread {
         else {
             while (c1Size == Main.counterNum && c2Size == Main.counterNum) {
                 try {
-                    msg("Busy wait to approach counter");
-                    sleep(Main.THIRTY_MIN/10);
+//   TMP COMMENT:                 msg("Busy wait to approach counter");
+                    sleep(Main.THIRTY_MIN/20);
                 } catch (InterruptedException e) {
                     //todo: Figure out what to put here
                 }
@@ -123,7 +123,7 @@ public class PassengerThread extends Thread {
      * they receive their boarding pass
      */
     private void goThroughSecurity() {
-        msg("Rushing to security");
+// TMP COMMENT:       msg("Rushing to security");
         /* Increase the default priority of the passenger and have them sleep for a random amount of time
         * to simulate rushing and then restore to default priority */
         setPriority(getPriority() + 1);
@@ -165,7 +165,7 @@ public class PassengerThread extends Thread {
             try {
                 sleep(Main.THIRTY_MIN/10);
             }catch (InterruptedException e){
-                msg("Called by flight attend to scan boarding pass");
+// TMP COMMENT:               msg("Called by flight attend to scan boarding pass");
                 interrupt();
             }
         }
@@ -185,7 +185,7 @@ public class PassengerThread extends Thread {
         /* Simulate scanning boarding pass by doing yield() twice */
         PassengerThread.yield();
         PassengerThread.yield();
-        msg("Scanned boarding pass and boarded plane in group " + passengerInfo.get(3));
+// TMP COMMENT:       msg("Scanned boarding pass and boarded plane in group " + passengerInfo.get(3));
 
 
         /* Passenger sleeps during flight */
@@ -195,11 +195,10 @@ public class PassengerThread extends Thread {
     /** This method simulates the passenger sleeping on the plane for two hours until
      * being woken by the flight attendant to signal preparation for landing */
     private void sleepOnPlane() {
-        msg("I am in sleepOnPlane() method");
         try {
             sleep(5 * Main.THIRTY_MIN);
         } catch (InterruptedException e) {
-            msg("Woken up by flight attendant for landing procedure");
+//  TMP COMMENT:          msg("Woken up by flight attendant for landing procedure");
             interrupt();
         }
 

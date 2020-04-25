@@ -54,7 +54,7 @@ public class FlightAttendantThread extends Thread {
             try{
                 sleep(200);
             }catch(InterruptedException e){
-                msg("Interrupted by clock to begin boarding process ");
+// TMPCOMMENT:               msg("Interrupted by clock to begin boarding process ");
                 interrupt();
             }
         }
@@ -72,7 +72,7 @@ public class FlightAttendantThread extends Thread {
 
         /*Flight Attendant has closed the doors */
         hasFinishedBoarding.set(true);
-        msg("Doors of plane are closed. Please rebook your flight at this time");
+// TMP COMMENT:       msg("Doors of plane are closed. Please rebook your flight at this time");
         /* Flight attendant interrupts all passengers that have passed to security but missed boarding */
         sendLatePassengersHome();
 
@@ -80,12 +80,15 @@ public class FlightAttendantThread extends Thread {
         try {
             sleep(4 * Main.THIRTY_MIN);
         } catch (InterruptedException e) {
-            msg("All passengers aboard please ready yourself for landing");
+// TMP COMMENT:           msg("All passengers aboard please ready yourself for landing");
             interrupt();
         }
 
-        /* Sort the planeQueue for help with disembarking plane */
-        planeQueue.sort((passenger1, passenger2) -> {
+        Vector<PassengerThread> disembarkPlaneQueue = new Vector<>();
+        disembarkPlaneQueue.addAll(planeQueue);
+
+        /* Sort the planeQueue by seat number for help with disembarking plane */
+        disembarkPlaneQueue.sort((passenger1, passenger2) -> {
             if (passenger1.passengerInfo.get(2) < passenger2.passengerInfo.get(2)) {
                 return -1;
             }
@@ -97,14 +100,28 @@ public class FlightAttendantThread extends Thread {
                 return 0;
             }
         });
-        msg("Sorted successfully");
 
+//        msg("Sorted successfully");
 
+        passengersDisembark(disembarkPlaneQueue);
 
-
-
+        msg("Flight Attendant terminating");
     }
 
+    private void passengersDisembark(Vector<PassengerThread> disembarkPlaneQueue) {
+        for (int i = 0; i < disembarkPlaneQueue.size(); i++) {
+            PassengerThread p = disembarkPlaneQueue.remove(i);
+            if (p.isAlive()) {
+                try {
+                    p.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        msg("Passengers have disembarked. Cleaning Plane");
+
+    }
 
 
     /** This method is used by the flight attendant to board passengers onto the plane
@@ -162,6 +179,6 @@ public class FlightAttendantThread extends Thread {
         }
     }
 
-    
+
 }
 

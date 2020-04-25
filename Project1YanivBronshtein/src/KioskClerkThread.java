@@ -74,7 +74,8 @@ public class KioskClerkThread extends Thread {
             }
         }
         /* As soon as the while loop is exited, the clerks are done for the day */
-        msg("All passengers at counter " + id + " have been served. Thread Terminating");
+
+// TMP COMMENT:       msg("All passengers at counter " + id + " have been served. Thread Terminating");
     }
 
     /** This method is used by the KioskClerkThread to assign the passenger a boarding pass(seat and zone num)

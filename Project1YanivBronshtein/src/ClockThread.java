@@ -57,7 +57,7 @@ public class ClockThread extends Thread {
 
 
 
-        msg("All passengers have disembarked. Clock terminating");
+        msg("Clock terminating");
         for (PassengerThread passenger : Main.passengers) {
             passenger.interrupt();
         }

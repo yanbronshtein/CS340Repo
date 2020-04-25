@@ -1,62 +1,41 @@
-/** This class contains the main method which creates a thread that in turn starts Clock, Kiosk Clerk, Flight Attendant,
- * and passenger threads
- * @author Yaniv Bronshtein
- * @version 1.0*/
+import java.util.Vector;
+
 public class Main {
-    /**Single clock thread */
-    public static ClockThread clock;
-    /** Array of KioskClerkThreads */
-    public static KioskClerkThread[] clerks;
-    /** Array of PassengerThreads */
-    public static PassengerThread[] passengers;
-    /** Single flight attendant thread */
-    public static FlightAttendantThread flightAttendant;
-    /** Number of passengers boarding plane. The max is 30 and the default is 30 but a number between 1 and 30 can be
-     * provided by the user */
-    public static int numPassengers = 3;
-    /** Number of check-in counters */
-    public static int numClerks = 2;
-    /** Max number of people allowed at a time at the kiosk counters */
-    public static int counterNum = 3;
-    /** Max number of allowed passengers in a group boarding the plane */
-    public static int groupNum = 4;
-    /** Constant specifying the time unit of 30 min as 2000 milliseconds  */
-    public static final long THIRTY_MIN = 2000;
 
-    /**main() method
-     * @param args Single command line argument for the number of passengers */
     public static void main(String[] args) {
-        /*Create clock thread */
-        clock = new ClockThread(12*THIRTY_MIN);
 
-        /* Create clerk threads */
-        clerks = new KioskClerkThread[numClerks]; //only two clerks
-        for (int i = 0; i < numClerks; i++) {
-            clerks[i] = new KioskClerkThread(i);
-        }
-        /*Create passenger threads */
-        passengers = new PassengerThread[numPassengers]; //4 passengers
-        for (int i = 0; i < numPassengers; i++) {
-            passengers[i] = new PassengerThread(i);
-        }
-        /*Create Flight attendant thread */
-        flightAttendant = new FlightAttendantThread();
-
-        /*Start clock thread */
-        clock.start();
-
-        /* Start clerk threads */
-        for (KioskClerkThread clerk : clerks) {
-            clerk.start();
+        Vector<OneThread> myVec = new Vector<>(3);
+        for (int i = 0; i < 10; i++) {
+            myVec.add(new OneThread(i));
         }
 
-        /* Start passenger threads */
-        for (PassengerThread passenger : passengers) {
-            passenger.start();
+        for (OneThread thread: myVec) {
+            thread.start();
         }
 
-        /* Start flight attendant thread */
-        flightAttendant.start();
+//        while (!myVec.isEmpty()) {
+//            OneThread removedThread = myVec.remove(0);
+//            if (removedThread.isAlive()) {
+//                try {
+//                    removedThread.join();
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+
+        for (int i = 0; i < myVec.size() - 1; i++) {
+            OneThread removedThread1 = myVec.remove(i);
+            OneThread removedThread2 = myVec.remove(i+ 1);
+            if (removedThread2.isAlive()) {
+                try {
+                    removedThread1.join();
+
+                }catch (InterruptedException e) {
+
+                }
+            }
+        }
 
     }
 }
