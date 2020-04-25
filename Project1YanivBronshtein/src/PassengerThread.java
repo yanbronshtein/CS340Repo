@@ -125,14 +125,18 @@ public class PassengerThread extends Thread {
      * they receive their boarding pass
      */
     private void goThroughSecurity() {
-// TMP COMMENT:       msg("Rushing to security");
+        msg("Rushing to security");
         /* Increase the default priority of the passenger and have them sleep for a random amount of time
          * to simulate rushing and then restore to default priority */
         setPriority(getPriority() + 1);
         try {
             sleep((long) (Math.random() * Main.THIRTY_MIN));
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            if (ClockThread.isBoardingTimeOver.get()) {
+                msg("was late. Boarding time is over");
+            }else {
+                e.printStackTrace();
+            }
         }
         setPriority(getPriority() - 1);
 
