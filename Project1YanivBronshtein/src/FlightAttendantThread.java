@@ -124,7 +124,7 @@ public class FlightAttendantThread extends Thread {
                 return -1;
             }
             else if (passenger1.passengerInfo.get(2) > passenger2.passengerInfo.get(2)) {
-                return 1;
+                return -1;
             }
             else {
                 msg("Improper generation of unique tickets. Flight overbooked");
@@ -142,14 +142,26 @@ public class FlightAttendantThread extends Thread {
         for (int i = 0; i < disembarkPlaneQueue.size(); i++) {
             PassengerThread p = disembarkPlaneQueue.remove(i);
             onVacationQueue.add(p);
-//            if (p.isAlive()) {
+            if (p.isAlive()) {
+                try {
+                    p.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+//
+//        for (int i = disembarkPlaneQueue.size() - 1; i > 0 ; i++) {
+//            PassengerThread passenger = disembarkPlaneQueue.remove(i);
+//            onVacationQueue.add(passenger);
+//            if (disembarkPlaneQueue.get(i-1).isAlive()) {
 //                try {
-//                    p.join();
+//                    passenger.join();
 //                } catch (InterruptedException e) {
 //                    e.printStackTrace();
 //                }
 //            }
-        }
+//        }
         for (PassengerThread p: onVacationQueue) {
             p.interrupt();
         }

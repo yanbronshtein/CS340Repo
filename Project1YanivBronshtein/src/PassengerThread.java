@@ -12,7 +12,7 @@ public class PassengerThread extends Thread {
     public final Vector<Integer> passengerInfo = new Vector<>(3);
     /** Time in thread upon creation */
     public static long time = System.currentTimeMillis();
-
+    private int id;
     /** Constructor creates thread with unique name and id  */
     public PassengerThread(int num) {
         int id = num + 1;
@@ -118,6 +118,17 @@ public class PassengerThread extends Thread {
         }
 
 
+        /* Waiting to be interrupted by kiosk clerk to go through security */
+        while (!isInterrupted()) {
+            try {
+                sleep(100);
+            } catch (InterruptedException e) {
+                msg("Interrupted by Kiosk Clerk to go through security ");
+                interrupt();
+            }
+        }
+
+
         /* After having received the boarding pass, the passenger rushes to security */
         goThroughSecurity();
 
@@ -137,9 +148,10 @@ public class PassengerThread extends Thread {
             if (ClockThread.isBoardingTimeOver.get()) {
                 msg("was late. Boarding time is over");
                 interrupt();
-            }else {
-                e.printStackTrace();
             }
+//            else {
+//                e.printStackTrace();
+//            }
         }
         setPriority(getPriority() - 1);
 //        msg("Left security and added to proper zone queue");
@@ -204,13 +216,14 @@ public class PassengerThread extends Thread {
      * being woken by the flight attendant to signal preparation for landing */
     private void sleepOnPlane() {
         try {
-            sleep(10 * Main.THIRTY_MIN);
+            sleep(6 * Main.THIRTY_MIN);
         } catch (InterruptedException e) {
 //            msg("Woken up by flight attendant for landing procedure");
             interrupt();
-            waitToDepartPlane();
 
         }
+        waitToDepartPlane();
+
 
     }
 
@@ -221,6 +234,18 @@ public class PassengerThread extends Thread {
             } catch (InterruptedException e) {
                 msg("Leaving plane");
                 interrupt();
+            }
+        }
+
+
+    }
+
+    private void passengerJoin() {
+        if (this.isAlive()) {
+            try {
+                Main.passengers[id-1].join();
+            } catch (InterruptedException e) {
+                msg("Finished join");
             }
         }
     }

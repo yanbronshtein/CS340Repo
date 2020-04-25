@@ -104,5 +104,6 @@ public class KioskClerkThread extends Thread {
         servedPassenger.passengerInfo.set(1, zoneNum);
         servedPassenger.passengerInfo.set(2, seatNum);
         msg(servedPassenger.getName() + ": is in seat " + seatNum + " and zone " + zoneNum);
+        servedPassenger.interrupt();
     }
 }
