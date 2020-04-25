@@ -74,6 +74,13 @@ public class ClockThread extends Thread {
 //            passenger.interrupt();
 //        }
 
+        while (!isInterrupted()) {
+            try {
+                sleep(20);
+            } catch (InterruptedException e) {
+                interrupt();
+            }
+        }
         msg("Clock terminating");
 
 

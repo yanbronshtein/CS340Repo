@@ -133,6 +133,7 @@ public class FlightAttendantThread extends Thread {
         });
 
         passengersDisembark(disembarkPlaneQueue);
+        Main.clock.interrupt();
 
         msg("Flight Attendant terminating");
     }

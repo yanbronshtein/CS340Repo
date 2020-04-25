@@ -206,7 +206,7 @@ public class PassengerThread extends Thread {
         try {
             sleep(10 * Main.THIRTY_MIN);
         } catch (InterruptedException e) {
-            msg("Woken up by flight attendant for landing procedure");
+//            msg("Woken up by flight attendant for landing procedure");
             interrupt();
             waitToDepartPlane();
 
