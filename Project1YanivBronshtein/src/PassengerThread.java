@@ -38,9 +38,9 @@ public class PassengerThread extends Thread {
         try {
             sleep((long) (Math.random() * 6 * Main.THIRTY_MIN));
         } catch (InterruptedException e) {
-        //todo: Figure out what to put here
+            //todo: Figure out what to put here
         }
-//  TMP COMMENT:      msg("Arrived at airport");
+        msg("Arrived at airport");
         /* Passenger goes to the kiosk to print their pass */
         getBoardingPassAtKiosk();
 
@@ -71,9 +71,9 @@ public class PassengerThread extends Thread {
         }
 
         /* If the number of passengers at both counters is below the threshold add new passengers as follows:
-        * If the size of the line at counter 1 is less than the size of the line at counter 2, add to counter 1
-        * If the size of the line at counter 1 is greater than that of counter 2, add to counter 2
-        * If both lines have the same number of passengers, randomly pick a line to place the passenger*/
+         * If the size of the line at counter 1 is less than the size of the line at counter 2, add to counter 1
+         * If the size of the line at counter 1 is greater than that of counter 2, add to counter 2
+         * If both lines have the same number of passengers, randomly pick a line to place the passenger*/
         if (c1Size < Main.counterNum && c2Size < Main.counterNum) {
             if (c1Size < c2Size) {
 //                msg("Added to first queue");
@@ -114,6 +114,8 @@ public class PassengerThread extends Thread {
                 }
             }
         }
+
+
         /* After having received the boarding pass, the passenger rushes to security */
         goThroughSecurity();
 
@@ -125,7 +127,7 @@ public class PassengerThread extends Thread {
     private void goThroughSecurity() {
 // TMP COMMENT:       msg("Rushing to security");
         /* Increase the default priority of the passenger and have them sleep for a random amount of time
-        * to simulate rushing and then restore to default priority */
+         * to simulate rushing and then restore to default priority */
         setPriority(getPriority() + 1);
         try {
             sleep((long) (Math.random() * Main.THIRTY_MIN));

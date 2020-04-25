@@ -58,9 +58,9 @@ public class ClockThread extends Thread {
 
 
         msg("Clock terminating");
-        for (PassengerThread passenger : Main.passengers) {
-            passenger.interrupt();
-        }
+//        for (PassengerThread passenger : Main.passengers) {
+//            passenger.interrupt();
+//        }
 
     }
 }

@@ -12,7 +12,8 @@ public class KioskClerkThread extends Thread {
     /** Vector that holds the passengers for the second kiosk counter */
     public static final Vector<PassengerThread> c2Queue = new Vector<>(Main.counterNum);
     /** Total number of passengers served by both clerks */
-    public static int totalNumberPassengersServed;
+//    public static int totalNumberPassengersServed;
+    public static AtomicInteger totalNumberPassengersServed = new AtomicInteger(0);
     /** ID of KioskClerkThread */
     final int id;
     /** Vector that contains a list of randomized seat numbers */
@@ -30,7 +31,6 @@ public class KioskClerkThread extends Thread {
     public KioskClerkThread(int num) {
         id = num + 1;
         setName("KioskClerk-" + id);
-        totalNumberPassengersServed = 0;
         randomNumbersVec = generateRandomNumbers();
     }
 
@@ -61,21 +61,23 @@ public class KioskClerkThread extends Thread {
          * if the id is 2 and the second queue is not empty passengers are removed from there
          * In both cases, the assignBoardingPass() method is called on the passengers
          * and the totalNumberPassengersServed is incremented   */
-        while (totalNumberPassengersServed < Main.numPassengers) {
+        while (totalNumberPassengersServed.get() < Main.numPassengers) {
             if (id == 1 && !c1Queue.isEmpty()) {
                 PassengerThread servedPassenger = c1Queue.remove(0);
                 assignBoardingPass(servedPassenger);
-                totalNumberPassengersServed++;
+                totalNumberPassengersServed.getAndAdd(1);
             }
             if (id == 2 && !c2Queue.isEmpty()) {
                 PassengerThread servedPassenger = c2Queue.remove(0);
                 assignBoardingPass(servedPassenger);
-                totalNumberPassengersServed++;
+                totalNumberPassengersServed.getAndAdd(1);
             }
         }
         /* As soon as the while loop is exited, the clerks are done for the day */
+// TMP COMMENT       msg("All passengers at counter " + id + " have been served. Thread Terminating");
 
-// TMP COMMENT:       msg("All passengers at counter " + id + " have been served. Thread Terminating");
+
+        msg("All passengers at counter " + id + " have been served. Thread Terminating");
     }
 
     /** This method is used by the KioskClerkThread to assign the passenger a boarding pass(seat and zone num)

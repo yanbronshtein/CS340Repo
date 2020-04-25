@@ -29,8 +29,7 @@ public class FlightAttendantThread extends Thread {
     /** This vector holds the passengers in zone 3 */
     public static Vector<PassengerThread> z3Queue = new Vector<>(Main.numPassengers /3);
 
-    /** This vector holds the passengers from all zones that missed boarding */
-    public static Vector<PassengerThread> missedBoardingQueue = new Vector<>();
+    public static Vector<PassengerThread> onVacationQueue = new Vector<>();
 
     /** Constructs a FlightAttendantThread and sets its name */
     public FlightAttendantThread() {
@@ -54,9 +53,17 @@ public class FlightAttendantThread extends Thread {
             try{
                 sleep(200);
             }catch(InterruptedException e){
-// TMPCOMMENT:               msg("Interrupted by clock to begin boarding process ");
+                msg("Interrupted by clock to begin boarding process ");
                 interrupt();
             }
+        }
+        try {
+            Main.clerks[0].join();
+        } catch (InterruptedException e) {
+        }
+        try {
+            Main.clerks[1].join();
+        } catch (InterruptedException e) {
         }
 
 
@@ -101,8 +108,6 @@ public class FlightAttendantThread extends Thread {
             }
         });
 
-//        msg("Sorted successfully");
-
         passengersDisembark(disembarkPlaneQueue);
 
         msg("Flight Attendant terminating");
@@ -111,6 +116,7 @@ public class FlightAttendantThread extends Thread {
     private void passengersDisembark(Vector<PassengerThread> disembarkPlaneQueue) {
         for (int i = 0; i < disembarkPlaneQueue.size(); i++) {
             PassengerThread p = disembarkPlaneQueue.remove(i);
+            onVacationQueue.add(p);
             if (p.isAlive()) {
                 try {
                     p.join();
@@ -118,6 +124,11 @@ public class FlightAttendantThread extends Thread {
                     e.printStackTrace();
                 }
             }
+
+        }
+
+        for (PassengerThread p: onVacationQueue) {
+            p.interrupt();
         }
         msg("Passengers have disembarked. Cleaning Plane");
 
@@ -133,7 +144,7 @@ public class FlightAttendantThread extends Thread {
         long timeAllottedForCallingZone = start + allowedTime; //Calculate ending time
 
         /* Flight attendant removes passengers from their zone while the allotted time has no run out and the zoneQueue
-        * is not empty and adds to the waiting at door queue   */
+         * is not empty and adds to the waiting at door queue   */
         while (System.currentTimeMillis() < timeAllottedForCallingZone && !zoneQueue.isEmpty()) {
             PassengerThread temp = zoneQueue.remove(0);
 //            temp.interrupt();
