@@ -134,6 +134,7 @@ public class PassengerThread extends Thread {
         } catch (InterruptedException e) {
             if (ClockThread.isBoardingTimeOver.get()) {
                 msg("was late. Boarding time is over");
+                interrupt();
             }else {
                 e.printStackTrace();
             }
