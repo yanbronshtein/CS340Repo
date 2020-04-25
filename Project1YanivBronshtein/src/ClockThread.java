@@ -57,7 +57,7 @@ public class ClockThread extends Thread {
         try {
             sleep(4*Main.THIRTY_MIN);
         }catch (InterruptedException e) {
-            e.printStackTrace();
+            interrupt();
         }
 
         /* Time to interrupt flight attendant for disembarking plane */

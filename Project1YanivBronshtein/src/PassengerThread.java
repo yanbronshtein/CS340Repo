@@ -34,15 +34,22 @@ public class PassengerThread extends Thread {
     /** This method is executed by the Passenger Thread as soon as it is started */
     @Override
     public void run() {
-        /* Each passenger arrives approximately three hours before the flight */
-        try {
-            sleep((long) (Math.random() * 6 * Main.THIRTY_MIN));
-        } catch (InterruptedException e) {
-            //todo: Figure out what to put here
-        }
-        msg("Arrived at airport");
+//        /* Each passenger arrives approximately three hours before the flight */
+//        try {
+//            sleep((long) (Math.random() * 6 * Main.THIRTY_MIN));
+//        } catch (InterruptedException e) {
+//            //todo: Figure out what to put here
+//        }
+//        msg("Arrived at airport");
         /* Passenger goes to the kiosk to print their pass */
+        arriveAtAirport();
         getBoardingPassAtKiosk();
+        goThroughSecurity();
+        waitAtGate();
+        scanBoardingPass();
+        sleepOnPlane();
+        waitToDepartPlane();
+
 
 //        if (passengerInfo.get(3) == -1) {
 //            msg("Missed his flight");
@@ -53,6 +60,15 @@ public class PassengerThread extends Thread {
     }
 
 
+    private void arriveAtAirport() {
+        /* Each passenger arrives approximately three hours before the flight */
+        try {
+            sleep((long) (Math.random() * 3 * Main.THIRTY_MIN));
+        } catch (InterruptedException e) {
+            //todo: Figure out what to put here
+        }
+        msg("Arrived at airport");
+    }
     /** This method simulates the process of the passenger getting on line at one of the two counters to get their
      * boarding pass */
     private void getBoardingPassAtKiosk() {
@@ -62,7 +78,7 @@ public class PassengerThread extends Thread {
         int c2Size;
 
         /* Get the current number of passenger at the first counter the Kiosk Clerk
-        * Received professor's permission to include synchronized in this section of code  */
+         * Received professor's permission to include synchronized in this section of code  */
         synchronized (KioskClerkThread.c1Queue) {
             c1Size = KioskClerkThread.c1Queue.size();
         }
@@ -119,6 +135,7 @@ public class PassengerThread extends Thread {
 
 
         /* Waiting to be interrupted by kiosk clerk to go through security */
+        msg("Waiting to be interrupted by kiosk clerk to go through security");
         while (!isInterrupted()) {
             try {
                 sleep(100);
@@ -130,7 +147,7 @@ public class PassengerThread extends Thread {
 
 
         /* After having received the boarding pass, the passenger rushes to security */
-        goThroughSecurity();
+//        goThroughSecurity();
 
     }
 
@@ -143,12 +160,14 @@ public class PassengerThread extends Thread {
          * to simulate rushing and then restore to default priority */
         setPriority(getPriority() + 1);
         try {
-            sleep((long) (Math.random() * Main.THIRTY_MIN));
+            sleep((long) (Math.random() * 2 * Main.THIRTY_MIN));
         } catch (InterruptedException e) {
-            if (ClockThread.isBoardingTimeOver.get()) {
-                msg("was late. Boarding time is over");
-                interrupt();
-            }
+//            if (ClockThread.isBoardingTimeOver.get()) {
+//                msg("was late. Boarding time is over");
+//                interrupt();
+//            }
+            interrupt();
+
 //            else {
 //                e.printStackTrace();
 //            }
@@ -173,7 +192,7 @@ public class PassengerThread extends Thread {
 
 
         /* The passenger will now enter a busy wait at the gate */
-        waitAtGate();
+//        waitAtGate();
 
     }
 
@@ -185,13 +204,16 @@ public class PassengerThread extends Thread {
             try {
                 sleep(Main.THIRTY_MIN/10);
             }catch (InterruptedException e){
-// TMP COMMENT:               msg("Called by flight attend to scan boarding pass");
+                msg("Called by flight attend to scan boarding pass");
                 interrupt();
             }
         }
+
+        msg("Called by flight attend to scan boarding pass");
+
         /* After getting interrupted by the flight attendant the passenger goes to scan their boarding pass
          * immediately prior to boarding the plane */
-        scanBoardingPass();
+//        scanBoardingPass();
 
 //        if (passengerInfo.get(3) == -1) {
 //            msg("Passenger " + passengerInfo.get(0) + " has boarded the plane with zone " +
@@ -205,24 +227,26 @@ public class PassengerThread extends Thread {
         /* Simulate scanning boarding pass by doing yield() twice */
         PassengerThread.yield();
         PassengerThread.yield();
-// TMP COMMENT:       msg("Scanned boarding pass and boarded plane in group " + passengerInfo.get(3));
+        msg("Scanned boarding pass and boarded plane in group " + passengerInfo.get(3));
 
 
         /* Passenger sleeps during flight */
-        sleepOnPlane();
+//        sleepOnPlane();
     }
 
     /** This method simulates the passenger sleeping on the plane for two hours until
      * being woken by the flight attendant to signal preparation for landing */
     private void sleepOnPlane() {
-        try {
-            sleep(6 * Main.THIRTY_MIN);
-        } catch (InterruptedException e) {
+        while (!isInterrupted()) {
+            try {
+                sleep(20);
+            } catch (InterruptedException e) {
 //            msg("Woken up by flight attendant for landing procedure");
-            interrupt();
+                interrupt();
 
+            }
         }
-        waitToDepartPlane();
+//        waitToDepartPlane();
 
 
     }
@@ -236,6 +260,7 @@ public class PassengerThread extends Thread {
                 interrupt();
             }
         }
+        msg("Left plane to go on vacation");
 
 
     }

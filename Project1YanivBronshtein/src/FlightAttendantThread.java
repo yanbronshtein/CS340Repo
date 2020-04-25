@@ -48,6 +48,36 @@ public class FlightAttendantThread extends Thread {
      * passengers that the plane is landing and cleaning up after the passengers*/
     @Override
     public void run() {
+        waitForBoardingToStart();
+
+        while (!ClockThread.isBoardingTimeOver.get()) {
+            handleBoarding(z1Queue, atGateZ1Count);
+            handleBoarding(z2Queue, atGateZ2Count);
+            handleBoarding(z3Queue, atGateZ3Count);
+        }
+        msg("Finished Boarding");
+
+        /*Flight Attendant has closed the doors */
+        hasFinishedBoarding.set(true);
+        /* Flight attendant interrupts all passengers that have passed to security but missed boarding */
+        if (ClockThread.isBoardingTimeOver.get()) {
+                sendLatePassengersHome();
+        }
+        
+        inFlight();
+
+
+        
+        passengersDisembark();
+        msg("Passengers have disembarked. Cleaning Plane");
+        Main.clock.interrupt();
+
+        msg("Flight Attendant terminating");
+    }
+
+
+    private void waitForBoardingToStart() {
+        msg("Waiting to be interrupted by clock to start boarding");
         /* Flight Attendant busy waits until interrupted by the clock */
         while(!isInterrupted()){
             try{
@@ -57,119 +87,15 @@ public class FlightAttendantThread extends Thread {
                 interrupt();
             }
         }
-        //todo: DEAL WITH JOINS!!!!
-//        try {
-//            Main.clerks[0].join();
-//        } catch (InterruptedException e) {
-//        }
-//        try {
-//            Main.clerks[1].join();
-//        } catch (InterruptedException e) {
-//        }
-
-
-        /*First boarding phase: The Flight Attendant spends a quarter of 30 minutes boarding each zone equally */
-
-
-        while (!ClockThread.isBoardingTimeOver.get()) {
-
-            handleBoardingV2(z1Queue, atGateZ1Count);
-            handleBoardingV2(z2Queue, atGateZ2Count);
-            handleBoardingV2(z3Queue, atGateZ3Count);
-        }
-        msg("Finished Boarding");
-
-//        handleBoardingZone(z1Queue, Main.THIRTY_MIN/4);
-//        handleBoardingZone(z2Queue, Main.THIRTY_MIN/4);
-//        handleBoardingZone(z3Queue, Main.THIRTY_MIN/4);
-//
-//        /* Second boarding phase: The Flight Attendant spends a 20th of 30 minutes to go through all the zones again*/
-//        handleBoardingZone(z1Queue, Main.THIRTY_MIN/20);
-//        handleBoardingZone(z2Queue, Main.THIRTY_MIN/20);
-//        handleBoardingZone(z3Queue, Main.THIRTY_MIN/20);
-
-        /*Flight Attendant has closed the doors */
-        hasFinishedBoarding.set(true);
-        /* Flight attendant interrupts all passengers that have passed to security but missed boarding */
-        if (ClockThread.isBoardingTimeOver.get()) {
-                sendLatePassengersHome();
-        }
-
-
-        /* Flight attendant either wakes up on their own or most likely by the clock */
-        msg("Entering sleep on plane ");
-
-        while (!ClockThread.isTimeToDisembarkPlane.get()) {
-            try {
-                sleep(20);
-            } catch (InterruptedException e) {
-//                if (ClockThread.isTimeToDisembarkPlane.get()) {
-//                    msg("All passengers aboard prepare for landing");
-//                    interrupt();
-//                }
-                interrupt();
-            }
-        }
-
-        if (ClockThread.isTimeToDisembarkPlane.get()) {
-            msg("All passengers aboard prepare for landing");
-        }
-
-        Vector<PassengerThread> disembarkPlaneQueue = new Vector<>();
-        disembarkPlaneQueue.addAll(planeQueue);
-
-        /* Sort the planeQueue by seat number for help with disembarking plane */
-        disembarkPlaneQueue.sort((passenger1, passenger2) -> {
-            if (passenger1.passengerInfo.get(2) < passenger2.passengerInfo.get(2)) {
-                return -1;
-            }
-            else if (passenger1.passengerInfo.get(2) > passenger2.passengerInfo.get(2)) {
-                return -1;
-            }
-            else {
-                msg("Improper generation of unique tickets. Flight overbooked");
-                return 0;
-            }
-        });
-
-        passengersDisembark(disembarkPlaneQueue);
-        Main.clock.interrupt();
-
-        msg("Flight Attendant terminating");
     }
 
-    private void passengersDisembark(Vector<PassengerThread> disembarkPlaneQueue) {
-        for (int i = 0; i < disembarkPlaneQueue.size(); i++) {
-            PassengerThread p = disembarkPlaneQueue.remove(i);
-            onVacationQueue.add(p);
-            if (p.isAlive()) {
-                try {
-                    p.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-//
-//        for (int i = disembarkPlaneQueue.size() - 1; i > 0 ; i++) {
-//            PassengerThread passenger = disembarkPlaneQueue.remove(i);
-//            onVacationQueue.add(passenger);
-//            if (disembarkPlaneQueue.get(i-1).isAlive()) {
-//                try {
-//                    passenger.join();
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-        for (PassengerThread p: onVacationQueue) {
-            p.interrupt();
-        }
-        msg("Passengers have disembarked. Cleaning Plane");
 
-    }
-
-    private void handleBoardingV2(Vector<PassengerThread> zoneQueue, AtomicInteger atGateZoneCount) {
+    //todo: Change documentation here
+    /** This method is used by the flight attendant to board passengers onto the plane
+     * @param zoneQueue for zones 1,2 or 3
+     * @param atGateZoneCount long time allowed by the flight attendant for processing passengers in the zones
+     * This method is called twice on the same queues with two different allowedTimes*/
+    private void handleBoarding(Vector<PassengerThread> zoneQueue, AtomicInteger atGateZoneCount) {
         int numAddedToAtDoorQueue = 0;
 
         int count = atGateZoneCount.get();
@@ -192,7 +118,7 @@ public class FlightAttendantThread extends Thread {
                 boardingPassenger.passengerInfo.set(3, groupID.get()); //Add groupID
                 boardingPassenger.interrupt(); //Interrupt to have them scan their boarding pass
                 planeQueue.add(boardingPassenger);
-                msg("Passenger " + boardingPassenger.passengerInfo.get(0) + " has boarded the plane with zone " +
+                msg(boardingPassenger.getName() + " has boarded the plane with zone " +
                         boardingPassenger.passengerInfo.get(1) + " seat " + boardingPassenger.passengerInfo.get(2) +
                         " group ID " + boardingPassenger.passengerInfo.get(3));
                 i--;
@@ -202,41 +128,61 @@ public class FlightAttendantThread extends Thread {
         atGateZoneCount.set(count);
     }
 
-    /** This method is used by the flight attendant to board passengers onto the plane
-     * @param zoneQueue for zones 1,2 or 3
-     * @param allowedTime long time allowed by the flight attendant for processing passengers in the zones
-     * This method is called twice on the same queues with two different allowedTimes*/
-    public void handleBoardingZone(Vector<PassengerThread> zoneQueue, long allowedTime) {
-        long start = System.currentTimeMillis(); //Get current time
-        long timeAllottedForCallingZone = start + allowedTime; //Calculate ending time
 
-        /* Flight attendant removes passengers from their zone while the allotted time has no run out and the zoneQueue
-         * is not empty and adds to the waiting at door queue   */
-        while (System.currentTimeMillis() < timeAllottedForCallingZone && !zoneQueue.isEmpty()) {
-            PassengerThread temp = zoneQueue.remove(0);
-//            temp.interrupt();
-            atDoorQueue.add(temp);
-        }
+    private void inFlight() {
+        msg("Flight in progress");
 
-        /* Empty out entire atDoorQueue */
-        while (!atDoorQueue.isEmpty()) {
-            int i = Main.groupNum; //Counter for number of passengers in group Can be at most 3
-            groupID.getAndAdd(1); //Assign group to the next set of passengers
-
-            /* Assign group id to passenger and put them in the boardingPlane queue and interrupt them to scan
-            their ticket  */
-            while (i > 0 && !atDoorQueue.isEmpty()) {
-                PassengerThread boardingPassenger = atDoorQueue.remove(0);
-                boardingPassenger.passengerInfo.set(3, groupID.get()); //Add groupID
-                boardingPassenger.interrupt(); //Interrupt to have them scan their boarding pass
-                planeQueue.add(boardingPassenger);
-                msg("Passenger " + boardingPassenger.passengerInfo.get(0) + " has boarded the plane with zone " +
-                        boardingPassenger.passengerInfo.get(1) + " seat " + boardingPassenger.passengerInfo.get(2) +
-                        " group ID " + boardingPassenger.passengerInfo.get(3));
-                i--;
+        while (!ClockThread.isTimeToDisembarkPlane.get()) {
+            try {
+                sleep(20);
+            } catch (InterruptedException e) {
+                interrupt();
             }
         }
+        if (ClockThread.isTimeToDisembarkPlane.get()) {
+            msg("All passengers aboard prepare for landing");
+        }
     }
+
+    private void passengersDisembark() {
+        Vector<PassengerThread> disembarkPlaneQueue = new Vector<>();
+        disembarkPlaneQueue.addAll(planeQueue);
+
+        /* Sort the planeQueue by seat number for help with disembarking plane */
+        disembarkPlaneQueue.sort((passenger1, passenger2) -> {
+            if (passenger1.passengerInfo.get(2) < passenger2.passengerInfo.get(2)) {
+                return -1;
+            }
+            else if (passenger1.passengerInfo.get(2) > passenger2.passengerInfo.get(2)) {
+                return -1;
+            }
+            else {
+                msg("Improper generation of unique tickets. Flight overbooked");
+                return 0;
+            }
+        });
+        
+        for (int i = 0; i < disembarkPlaneQueue.size(); i++) {
+            PassengerThread p = disembarkPlaneQueue.remove(i);
+            onVacationQueue.add(p);
+            if (p.isAlive()) {
+                try {
+                    p.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        //todo: PROBABLY WRONG HERE
+        msg("Tell passengers to go home");
+        for (PassengerThread p: onVacationQueue) {
+            p.interrupt();
+        }
+    }
+
+
+
+
 
     /** This method goes through each of the queues removing any passengers and waking them up to go home and
      * rebook their tickets */
