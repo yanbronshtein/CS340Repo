@@ -61,11 +61,13 @@ public class PassengerThread extends Thread {
         /* Number of passengers at the second Kiosk Clerk counter */
         int c2Size;
 
-        /* Get the current number of passenger at the first counter the Kiosk Clerk  */
+        /* Get the current number of passenger at the first counter the Kiosk Clerk
+        * Received professor's permission to include synchronized in this section of code  */
         synchronized (KioskClerkThread.c1Queue) {
             c1Size = KioskClerkThread.c1Queue.size();
         }
         /* Get the current number of passenger at the second counter the Kiosk Clerk  */
+        /* Received professor's permission to include synchronized in this section of code  */
         synchronized (KioskClerkThread.c2Queue) {
             c2Size = KioskClerkThread.c2Queue.size();
         }

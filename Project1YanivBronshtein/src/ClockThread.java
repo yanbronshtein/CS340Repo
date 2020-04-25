@@ -12,7 +12,7 @@ public class ClockThread extends Thread {
     private static long totalTime;
 
     public static AtomicBoolean isBoardingTimeOver = new AtomicBoolean(false);
-
+    public static AtomicBoolean isTimeToDisembarkPlane = new AtomicBoolean(false);
     /** Constructs the ClockThread
      * @param time total time given for this program in milliseconds */
     public ClockThread(long time) {
@@ -38,6 +38,7 @@ public class ClockThread extends Thread {
             e.printStackTrace();
         }
 
+
         //Notify flight attendant that it is time to board
         if (Main.flightAttendant.isAlive()) {
             Main.flightAttendant.interrupt();
@@ -50,19 +51,23 @@ public class ClockThread extends Thread {
             e.printStackTrace();
         }
 
+        /*Time to interrupt late passengers */
         isBoardingTimeOver.set(true);
-
         //Sleep 2 hours until it is time for landing
         try {
-            sleep(5*Main.THIRTY_MIN);
+            sleep(4*Main.THIRTY_MIN);
         }catch (InterruptedException e) {
             e.printStackTrace();
         }
 
+        /* Time to interrupt flight attendant for disembarking plane */
+        isTimeToDisembarkPlane.set(true);
+
+
+
         //todo: Add code to signal passengers terminating
 
 
-        msg("Time to interrupt late passengers");
         /* Terminate all passengers who have not been given a group id */
 //        for (PassengerThread passenger : Main.passengers) {
 //

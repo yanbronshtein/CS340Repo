@@ -69,38 +69,45 @@ public class FlightAttendantThread extends Thread {
 
 
         /*First boarding phase: The Flight Attendant spends a quarter of 30 minutes boarding each zone equally */
-        handleBoardingZone(z1Queue, Main.THIRTY_MIN/4);
-        handleBoardingZone(z2Queue, Main.THIRTY_MIN/4);
-        handleBoardingZone(z3Queue, Main.THIRTY_MIN/4);
 
-        /* Second boarding phase: The Flight Attendant spends a 20th of 30 minutes to go through all the zones again*/
-        handleBoardingZone(z1Queue, Main.THIRTY_MIN/20);
-        handleBoardingZone(z2Queue, Main.THIRTY_MIN/20);
-        handleBoardingZone(z3Queue, Main.THIRTY_MIN/20);
+
+        while (!ClockThread.isBoardingTimeOver.get()) {
+
+            handleBoardingV2(z1Queue, atGateZ1Count);
+            handleBoardingV2(z2Queue, atGateZ2Count);
+            handleBoardingV2(z3Queue, atGateZ3Count);
+        }
+
+//        handleBoardingZone(z1Queue, Main.THIRTY_MIN/4);
+//        handleBoardingZone(z2Queue, Main.THIRTY_MIN/4);
+//        handleBoardingZone(z3Queue, Main.THIRTY_MIN/4);
+//
+//        /* Second boarding phase: The Flight Attendant spends a 20th of 30 minutes to go through all the zones again*/
+//        handleBoardingZone(z1Queue, Main.THIRTY_MIN/20);
+//        handleBoardingZone(z2Queue, Main.THIRTY_MIN/20);
+//        handleBoardingZone(z3Queue, Main.THIRTY_MIN/20);
 
         /*Flight Attendant has closed the doors */
         hasFinishedBoarding.set(true);
-// TMP COMMENT:       msg("Doors of plane are closed. Please rebook your flight at this time");
         /* Flight attendant interrupts all passengers that have passed to security but missed boarding */
-        while (true) {
-            if (ClockThread.isBoardingTimeOver.get()) {
+        if (ClockThread.isBoardingTimeOver.get()) {
                 sendLatePassengersHome();
-                break;
-            }
-//            try {
-//                sleep(10);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
         }
 
 
         /* Flight attendant either wakes up on their own or most likely by the clock */
+        msg("Entering sleep on plane ");
         try {
             sleep(4 * Main.THIRTY_MIN);
         } catch (InterruptedException e) {
-// TMP COMMENT:           msg("All passengers aboard please ready yourself for landing");
-            interrupt();
+            if (ClockThread.isTimeToDisembarkPlane.get()) {
+                msg("All passengers aboard prepare for landing");
+                interrupt();
+            }
+        }
+
+        if (ClockThread.isTimeToDisembarkPlane.get()) {
+            msg("All passengers aboard prepare for landing");
         }
 
         Vector<PassengerThread> disembarkPlaneQueue = new Vector<>();
@@ -136,9 +143,7 @@ public class FlightAttendantThread extends Thread {
                     e.printStackTrace();
                 }
             }
-
         }
-
         for (PassengerThread p: onVacationQueue) {
             p.interrupt();
         }
@@ -146,6 +151,36 @@ public class FlightAttendantThread extends Thread {
 
     }
 
+    private void handleBoardingV2(Vector<PassengerThread> zoneQueue, AtomicInteger atGateZoneCount) {
+        int numAddedToAtDoorQueue = 0;
+
+        while (atGateZoneCount.get() > 0) {
+            PassengerThread temp = zoneQueue.remove(0);
+            atDoorQueue.add(temp);
+            atGateZoneCount.getAndDecrement();
+            numAddedToAtDoorQueue ++;
+        }
+
+        /* Empty out entire atDoorQueue */
+        while (numAddedToAtDoorQueue > 0) {
+            int i = Main.groupNum; //Counter for number of passengers in group Can be at most 3
+            groupID.getAndAdd(1); //Assign group to the next set of passengers
+
+            /* Assign group id to passenger and put them in the boardingPlane queue and interrupt them to scan
+            their ticket  */
+            while (i > 0 && !atDoorQueue.isEmpty()) {
+                PassengerThread boardingPassenger = atDoorQueue.remove(0);
+                boardingPassenger.passengerInfo.set(3, groupID.get()); //Add groupID
+                boardingPassenger.interrupt(); //Interrupt to have them scan their boarding pass
+                planeQueue.add(boardingPassenger);
+                msg("Passenger " + boardingPassenger.passengerInfo.get(0) + " has boarded the plane with zone " +
+                        boardingPassenger.passengerInfo.get(1) + " seat " + boardingPassenger.passengerInfo.get(2) +
+                        " group ID " + boardingPassenger.passengerInfo.get(3));
+                i--;
+            }
+            numAddedToAtDoorQueue--;
+        }
+    }
 
     /** This method is used by the flight attendant to board passengers onto the plane
      * @param zoneQueue for zones 1,2 or 3
