@@ -62,7 +62,7 @@ public class ClockThread extends Thread {
 
         /* Time to interrupt flight attendant for disembarking plane */
         isTimeToDisembarkPlane.set(true);
-
+        Main.flightAttendant.interrupt();
 
 
         //todo: Add code to signal passengers terminating

@@ -13,7 +13,7 @@ public class Main {
     public static FlightAttendantThread flightAttendant;
     /** Number of passengers boarding plane. The max is 30 and the default is 30 but a number between 1 and 30 can be
      * provided by the user */
-    public static int numPassengers = 10;
+    public static int numPassengers = 4;
     /** Number of check-in counters */
     public static int numClerks = 2;
     /** Max number of people allowed at a time at the kiosk counters */

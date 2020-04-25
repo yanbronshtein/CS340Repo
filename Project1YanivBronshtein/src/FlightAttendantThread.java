@@ -77,6 +77,7 @@ public class FlightAttendantThread extends Thread {
             handleBoardingV2(z2Queue, atGateZ2Count);
             handleBoardingV2(z3Queue, atGateZ3Count);
         }
+        msg("Finished Boarding");
 
 //        handleBoardingZone(z1Queue, Main.THIRTY_MIN/4);
 //        handleBoardingZone(z2Queue, Main.THIRTY_MIN/4);
@@ -97,11 +98,15 @@ public class FlightAttendantThread extends Thread {
 
         /* Flight attendant either wakes up on their own or most likely by the clock */
         msg("Entering sleep on plane ");
-        try {
-            sleep(4 * Main.THIRTY_MIN);
-        } catch (InterruptedException e) {
-            if (ClockThread.isTimeToDisembarkPlane.get()) {
-                msg("All passengers aboard prepare for landing");
+
+        while (!ClockThread.isTimeToDisembarkPlane.get()) {
+            try {
+                sleep(20);
+            } catch (InterruptedException e) {
+//                if (ClockThread.isTimeToDisembarkPlane.get()) {
+//                    msg("All passengers aboard prepare for landing");
+//                    interrupt();
+//                }
                 interrupt();
             }
         }
@@ -136,13 +141,13 @@ public class FlightAttendantThread extends Thread {
         for (int i = 0; i < disembarkPlaneQueue.size(); i++) {
             PassengerThread p = disembarkPlaneQueue.remove(i);
             onVacationQueue.add(p);
-            if (p.isAlive()) {
-                try {
-                    p.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+//            if (p.isAlive()) {
+//                try {
+//                    p.join();
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
         }
         for (PassengerThread p: onVacationQueue) {
             p.interrupt();
@@ -154,10 +159,11 @@ public class FlightAttendantThread extends Thread {
     private void handleBoardingV2(Vector<PassengerThread> zoneQueue, AtomicInteger atGateZoneCount) {
         int numAddedToAtDoorQueue = 0;
 
-        while (atGateZoneCount.get() > 0) {
+        int count = atGateZoneCount.get();
+        while (count > 0) {
             PassengerThread temp = zoneQueue.remove(0);
             atDoorQueue.add(temp);
-            atGateZoneCount.getAndDecrement();
+            count--;
             numAddedToAtDoorQueue ++;
         }
 
@@ -180,6 +186,7 @@ public class FlightAttendantThread extends Thread {
             }
             numAddedToAtDoorQueue--;
         }
+        atGateZoneCount.set(count);
     }
 
     /** This method is used by the flight attendant to board passengers onto the plane

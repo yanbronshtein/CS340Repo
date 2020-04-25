@@ -44,11 +44,11 @@ public class PassengerThread extends Thread {
         /* Passenger goes to the kiosk to print their pass */
         getBoardingPassAtKiosk();
 
-        if (passengerInfo.get(3) == -1) {
-            msg("Missed his flight");
-        } else {
-            msg("It's vacation time!");
-        }
+//        if (passengerInfo.get(3) == -1) {
+//            msg("Missed his flight");
+//        } else {
+//            msg("It's vacation time!");
+//        }
 
     }
 
@@ -142,7 +142,6 @@ public class PassengerThread extends Thread {
             }
         }
         setPriority(getPriority() - 1);
-
 //        msg("Left security and added to proper zone queue");
         /* Passenger enters is placed in one of 3 zone queues based on their passenger info  */
         switch (passengerInfo.get(1)) {
@@ -205,13 +204,14 @@ public class PassengerThread extends Thread {
      * being woken by the flight attendant to signal preparation for landing */
     private void sleepOnPlane() {
         try {
-            sleep(5 * Main.THIRTY_MIN);
+            sleep(10 * Main.THIRTY_MIN);
         } catch (InterruptedException e) {
-//  TMP COMMENT:          msg("Woken up by flight attendant for landing procedure");
+            msg("Woken up by flight attendant for landing procedure");
             interrupt();
+            waitToDepartPlane();
+
         }
 
-        waitToDepartPlane();
     }
 
     private void waitToDepartPlane() {
