@@ -19,7 +19,7 @@ public class PassengerThread extends Thread {
 
     public AtomicBoolean isTimeToGoThroughSecurity = new AtomicBoolean(false);
     public AtomicBoolean isTimeToLeavePlane = new AtomicBoolean(false);
-    public AtomicBoolean didMissFlight = new AtomicBoolean(false);
+//    public AtomicBoolean didMissFlight = new AtomicBoolean(false);
     /** Constructor creates thread with unique name and id  */
     public PassengerThread(int num) {
         int id = num + 1;
@@ -71,7 +71,7 @@ public class PassengerThread extends Thread {
     private void arriveAtAirport() {
         /* Each passenger arrives approximately three hours before the flight */
         try {
-            sleep((long) (Math.random() * 3 * Main.THIRTY_MIN));
+            sleep((long) (Math.random() * 6 * Main.THIRTY_MIN));
         } catch (InterruptedException e) {
             //todo: Figure out what to put here
         }
@@ -203,7 +203,7 @@ public class PassengerThread extends Thread {
      * If the flight attendant has set the hasFinishedBoarding flag to true, and the passenger
      * has exited the busy wait for that reason, then they were late and the thread should terminate naturally*/
     private void waitAtGate() {
-        while (!isInterrupted() && !didMissFlight.get()) {
+        while (!isInterrupted()) {
             try {
                 sleep(Main.THIRTY_MIN/10);
             }catch (InterruptedException e){

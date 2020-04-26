@@ -29,7 +29,6 @@ public class FlightAttendantThread extends Thread {
     /** This vector holds the passengers in zone 3 */
     public static Vector<PassengerThread> z3Queue = new Vector<>(Main.numPassengers /3);
 
-    public static Vector<PassengerThread> onVacationQueue = new Vector<>();
 
     /** Constructs a FlightAttendantThread and sets its name */
     public FlightAttendantThread() {
@@ -50,29 +49,37 @@ public class FlightAttendantThread extends Thread {
     public void run() {
         waitForBoardingToStart();
 
-        while (!ClockThread.isBoardingTimeOver.get()) {
-            handleBoarding(z1Queue, atGateZ1Count);
-            try {
-                sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+//        while (!ClockThread.isBoardingTimeOver.get()) {
+//            handleBoarding(z1Queue, atGateZ1Count);
+//            try {
+//                sleep(100);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//
+//            handleBoarding(z2Queue, atGateZ2Count);
+//            try {
+//                sleep(100);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//
+//            handleBoarding(z3Queue, atGateZ3Count);
+//            try {
+//                sleep(100);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
 
-            handleBoarding(z2Queue, atGateZ2Count);
-            try {
-                sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+//        }
 
-            handleBoarding(z3Queue, atGateZ3Count);
-            try {
-                sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        handleBoardingZone(z1Queue, Main.THIRTY_MIN/4);
+        handleBoardingZone(z2Queue, Main.THIRTY_MIN/4);
+        handleBoardingZone(z3Queue, Main.THIRTY_MIN/4);
+        handleBoardingZone(z1Queue, Main.THIRTY_MIN/20);
+        handleBoardingZone(z2Queue, Main.THIRTY_MIN/20);
+        handleBoardingZone(z3Queue, Main.THIRTY_MIN/20);
 
-        }
         msg("Finished Boarding");
 
         /*Flight Attendant has closed the doors */
@@ -102,6 +109,43 @@ public class FlightAttendantThread extends Thread {
             }catch(InterruptedException e){
                 msg("Interrupted by clock to begin boarding process ");
                 interrupt();
+            }
+        }
+    }
+
+
+    /** This method is used by the flight attendant to board passengers onto the plane
+     * @param zoneQueue for zones 1,2 or 3
+     * @param allowedTime long time allowed by the flight attendant for processing passengers in the zones
+     * This method is called twice on the same queues with two different allowedTimes*/
+    public void handleBoardingZone(Vector<PassengerThread> zoneQueue, long allowedTime) {
+        long start = System.currentTimeMillis(); //Get current time
+        long timeAllottedForCallingZone = start + allowedTime; //Calculate ending time
+
+        /* Flight attendant removes passengers from their zone while the allotted time has no run out and the zoneQueue
+         * is not empty and adds to the waiting at door queue   */
+        while (System.currentTimeMillis() < timeAllottedForCallingZone && !zoneQueue.isEmpty()) {
+            PassengerThread temp = zoneQueue.remove(0);
+//            temp.interrupt();
+            atDoorQueue.add(temp);
+        }
+
+        /* Empty out entire atDoorQueue */
+        while (!atDoorQueue.isEmpty()) {
+            int i = Main.groupNum; //Counter for number of passengers in group Can be at most 3
+            groupID.getAndIncrement(); //Assign group to the next set of passengers
+
+            /* Assign group id to passenger and put them in the boardingPlane queue and interrupt them to scan
+            their ticket  */
+            while (i > 0 && !atDoorQueue.isEmpty()) {
+                PassengerThread boardingPassenger = atDoorQueue.remove(0);
+                boardingPassenger.passengerInfo.set(3, groupID.get()); //Add groupID
+                boardingPassenger.interrupt(); //Interrupt to have them scan their boarding pass
+                planeQueue.add(boardingPassenger);
+                msg("Passenger " + boardingPassenger.passengerInfo.get(0) + " has boarded the plane with zone " +
+                        boardingPassenger.passengerInfo.get(1) + " seat " + boardingPassenger.passengerInfo.get(2) +
+                        " group ID " + boardingPassenger.passengerInfo.get(3));
+                i--;
             }
         }
     }
@@ -153,21 +197,10 @@ public class FlightAttendantThread extends Thread {
     /** This method goes through each of the queues removing any passengers and waking them up to go home and
      * rebook their tickets */
     public void sendLatePassengersHome() {
-//        for (PassengerThread passenger : Main.passengers) {
-//            if (passenger.passengerInfo.get(3) == -1) {
-//                msg("Passenger with id " + passenger.passengerInfo.get(0) + " was late. Rebook flight and go home");
-//                passenger.didMissFlight.set(true);
-//                passenger.interrupt();
-//            }
-//        }
-
-
-
         while (!z1Queue.isEmpty()) {
             PassengerThread passenger = z1Queue.remove(0);
             if (passenger.passengerInfo.get(3) == -1) {
                 msg("Passenger with id " + passenger.passengerInfo.get(0) + " was late. Rebook flight and go home");
-                passenger.didMissFlight.set(true);
                 passenger.interrupt();
             }
         }
@@ -177,7 +210,6 @@ public class FlightAttendantThread extends Thread {
             PassengerThread passenger = z2Queue.remove(0);
             if (passenger.passengerInfo.get(3) == -1) {
                 msg("Passenger with id " + passenger.passengerInfo.get(0) + " was late. Rebook flight and go home");
-                passenger.didMissFlight.set(true);
                 passenger.interrupt();
             }
         }
@@ -187,7 +219,6 @@ public class FlightAttendantThread extends Thread {
             PassengerThread passenger = z3Queue.remove(0);
             if (passenger.passengerInfo.get(3) == -1) {
                 msg("Passenger with id " + passenger.passengerInfo.get(0) + " was late. Rebook flight and go home");
-                passenger.didMissFlight.set(true);
                 passenger.interrupt();
             }
         }
