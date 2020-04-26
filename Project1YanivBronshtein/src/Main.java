@@ -26,6 +26,19 @@ public class Main {
     /**main() method
      * @param args Single command line argument for the number of passengers */
     public static void main(String[] args) {
+
+        if (args.length == 1) {
+            int tempVal;
+            try {
+                tempVal = Integer.parseInt(args[0]);
+            }catch (NumberFormatException e) {
+                throw new IllegalArgumentException("The number entered is an invalid integer");
+            }
+            if (tempVal < 1 || tempVal > 30)
+                throw new IllegalArgumentException("The number entered is not between 1 and 30");
+            numPassengers = tempVal;
+        }
+
         /*Create clock thread */
         clock = new ClockThread(12*THIRTY_MIN);
 
