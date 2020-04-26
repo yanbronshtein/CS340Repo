@@ -38,7 +38,6 @@ public class ClockThread extends Thread {
             e.printStackTrace();
         }
 
-
         //Notify flight attendant that it is time to board
         if (Main.flightAttendant.isAlive()) {
             Main.flightAttendant.interrupt();
@@ -63,16 +62,6 @@ public class ClockThread extends Thread {
         /* Time to interrupt flight attendant for disembarking plane */
         isTimeToDisembarkPlane.set(true);
         Main.flightAttendant.interrupt();
-
-
-        //todo: Add code to signal passengers terminating
-
-
-        /* Terminate all passengers who have not been given a group id */
-//        for (PassengerThread passenger : Main.passengers) {
-//
-//            passenger.interrupt();
-//        }
 
         while (!isInterrupted()) {
             try {

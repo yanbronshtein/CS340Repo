@@ -52,22 +52,40 @@ public class FlightAttendantThread extends Thread {
 
         while (!ClockThread.isBoardingTimeOver.get()) {
             handleBoarding(z1Queue, atGateZ1Count);
+            try {
+                sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
             handleBoarding(z2Queue, atGateZ2Count);
+            try {
+                sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
             handleBoarding(z3Queue, atGateZ3Count);
+            try {
+                sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
         }
         msg("Finished Boarding");
 
         /*Flight Attendant has closed the doors */
-        hasFinishedBoarding.set(true);
+//        hasFinishedBoarding.set(true);
         /* Flight attendant interrupts all passengers that have passed to security but missed boarding */
-        if (ClockThread.isBoardingTimeOver.get()) {
-                sendLatePassengersHome();
-        }
-        
+//        if (ClockThread.isBoardingTimeOver.get()) {
+            sendLatePassengersHome();
+//        }
+
         inFlight();
 
 
-        
+
         passengersDisembark();
         msg("Passengers have disembarked. Cleaning Plane");
         Main.clock.interrupt();
@@ -77,7 +95,6 @@ public class FlightAttendantThread extends Thread {
 
 
     private void waitForBoardingToStart() {
-        msg("Waiting to be interrupted by clock to start boarding");
         /* Flight Attendant busy waits until interrupted by the clock */
         while(!isInterrupted()){
             try{
@@ -116,7 +133,9 @@ public class FlightAttendantThread extends Thread {
             while (i > 0 && !atDoorQueue.isEmpty()) {
                 PassengerThread boardingPassenger = atDoorQueue.remove(0);
                 boardingPassenger.passengerInfo.set(3, groupID.get()); //Add groupID
-                boardingPassenger.interrupt(); //Interrupt to have them scan their boarding pass
+//                boardingPassenger.yield();
+//                boardingPassenger.yield();
+//                boardingPassenger.interrupt(); //Interrupt to have them scan their boarding pass
                 planeQueue.add(boardingPassenger);
                 msg(boardingPassenger.getName() + " has boarded the plane with zone " +
                         boardingPassenger.passengerInfo.get(1) + " seat " + boardingPassenger.passengerInfo.get(2) +
@@ -126,6 +145,52 @@ public class FlightAttendantThread extends Thread {
             numAddedToAtDoorQueue--;
         }
         atGateZoneCount.set(count);
+
+
+    }
+
+
+    /** This method goes through each of the queues removing any passengers and waking them up to go home and
+     * rebook their tickets */
+    public void sendLatePassengersHome() {
+//        for (PassengerThread passenger : Main.passengers) {
+//            if (passenger.passengerInfo.get(3) == -1) {
+//                msg("Passenger with id " + passenger.passengerInfo.get(0) + " was late. Rebook flight and go home");
+//                passenger.didMissFlight.set(true);
+//                passenger.interrupt();
+//            }
+//        }
+
+
+
+        while (!z1Queue.isEmpty()) {
+            PassengerThread passenger = z1Queue.remove(0);
+            if (passenger.passengerInfo.get(3) == -1) {
+                msg("Passenger with id " + passenger.passengerInfo.get(0) + " was late. Rebook flight and go home");
+                passenger.didMissFlight.set(true);
+                passenger.interrupt();
+            }
+        }
+
+
+        while (!z2Queue.isEmpty()) {
+            PassengerThread passenger = z2Queue.remove(0);
+            if (passenger.passengerInfo.get(3) == -1) {
+                msg("Passenger with id " + passenger.passengerInfo.get(0) + " was late. Rebook flight and go home");
+                passenger.didMissFlight.set(true);
+                passenger.interrupt();
+            }
+        }
+
+
+        while (!z3Queue.isEmpty()) {
+            PassengerThread passenger = z3Queue.remove(0);
+            if (passenger.passengerInfo.get(3) == -1) {
+                msg("Passenger with id " + passenger.passengerInfo.get(0) + " was late. Rebook flight and go home");
+                passenger.didMissFlight.set(true);
+                passenger.interrupt();
+            }
+        }
     }
 
 
@@ -154,61 +219,31 @@ public class FlightAttendantThread extends Thread {
                 return -1;
             }
             else if (passenger1.passengerInfo.get(2) > passenger2.passengerInfo.get(2)) {
-                return -1;
+                return 1;
             }
             else {
                 msg("Improper generation of unique tickets. Flight overbooked");
                 return 0;
             }
         });
-        
+
+        msg("Tell passengers to go home");
+
         for (int i = 0; i < disembarkPlaneQueue.size(); i++) {
             PassengerThread p = disembarkPlaneQueue.remove(i);
-            onVacationQueue.add(p);
+            msg(p.getName() + " with seat number " + p.passengerInfo.get(2) + " is leaving the plane" );
+            p.isTimeToLeavePlane.set(true);
+            p.interrupt();
+
             if (p.isAlive()) {
                 try {
                     p.join();
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
                 }
             }
         }
-        //todo: PROBABLY WRONG HERE
-        msg("Tell passengers to go home");
-        for (PassengerThread p: onVacationQueue) {
-            p.interrupt();
-        }
+
     }
-
-
-
-
-
-    /** This method goes through each of the queues removing any passengers and waking them up to go home and
-     * rebook their tickets */
-    public void sendLatePassengersHome() {
-
-        for (PassengerThread passenger : Main.passengers) {
-            if (passenger.passengerInfo.get(3) == -1) {
-                msg("Passenger with id " + passenger.passengerInfo.get(0) + " was late. Rebook flight and go home");
-                passenger.interrupt();
-            }
-        }
-        while (!z1Queue.isEmpty()) {
-            PassengerThread latePassenger = z1Queue.remove(0);
-            latePassenger.interrupt();
-        }
-
-        while (!z2Queue.isEmpty()) {
-            PassengerThread latePassenger = z2Queue.remove(0);
-            latePassenger.interrupt();
-        }
-
-        while (!z3Queue.isEmpty()) {
-            PassengerThread latePassenger = z3Queue.remove(0);
-            latePassenger.interrupt();
-        }
-    }
-
 
 }

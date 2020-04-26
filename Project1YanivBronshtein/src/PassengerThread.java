@@ -1,4 +1,6 @@
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /** This class simulates the behavior of the passenger thread
  * @author Yaniv Bronshtein
  * @version 1.0*/
@@ -13,6 +15,11 @@ public class PassengerThread extends Thread {
     /** Time in thread upon creation */
     public static long time = System.currentTimeMillis();
     private int id;
+
+
+    public AtomicBoolean isTimeToGoThroughSecurity = new AtomicBoolean(false);
+    public AtomicBoolean isTimeToLeavePlane = new AtomicBoolean(false);
+    public AtomicBoolean didMissFlight = new AtomicBoolean(false);
     /** Constructor creates thread with unique name and id  */
     public PassengerThread(int num) {
         int id = num + 1;
@@ -47,6 +54,7 @@ public class PassengerThread extends Thread {
         goThroughSecurity();
         waitAtGate();
         scanBoardingPass();
+
         sleepOnPlane();
         waitToDepartPlane();
 
@@ -136,7 +144,7 @@ public class PassengerThread extends Thread {
 
         /* Waiting to be interrupted by kiosk clerk to go through security */
         msg("Waiting to be interrupted by kiosk clerk to go through security");
-        while (!isInterrupted()) {
+        while (!isInterrupted() && !isTimeToGoThroughSecurity.get()) {
             try {
                 sleep(100);
             } catch (InterruptedException e) {
@@ -162,16 +170,11 @@ public class PassengerThread extends Thread {
         try {
             sleep((long) (Math.random() * 2 * Main.THIRTY_MIN));
         } catch (InterruptedException e) {
-//            if (ClockThread.isBoardingTimeOver.get()) {
-//                msg("was late. Boarding time is over");
-//                interrupt();
-//            }
+            e.printStackTrace();
             interrupt();
 
-//            else {
-//                e.printStackTrace();
-//            }
         }
+
         setPriority(getPriority() - 1);
 //        msg("Left security and added to proper zone queue");
         /* Passenger enters is placed in one of 3 zone queues based on their passenger info  */
@@ -200,7 +203,7 @@ public class PassengerThread extends Thread {
      * If the flight attendant has set the hasFinishedBoarding flag to true, and the passenger
      * has exited the busy wait for that reason, then they were late and the thread should terminate naturally*/
     private void waitAtGate() {
-        while (!isInterrupted()) {
+        while (!isInterrupted() && !didMissFlight.get()) {
             try {
                 sleep(Main.THIRTY_MIN/10);
             }catch (InterruptedException e){
@@ -227,32 +230,27 @@ public class PassengerThread extends Thread {
         /* Simulate scanning boarding pass by doing yield() twice */
         PassengerThread.yield();
         PassengerThread.yield();
-        msg("Scanned boarding pass and boarded plane in group " + passengerInfo.get(3));
-
-
-        /* Passenger sleeps during flight */
-//        sleepOnPlane();
     }
 
     /** This method simulates the passenger sleeping on the plane for two hours until
      * being woken by the flight attendant to signal preparation for landing */
     private void sleepOnPlane() {
         while (!isInterrupted()) {
+            msg(String.valueOf(isAlive()));
+
             try {
-                sleep(20);
+                Thread.sleep(Main.THIRTY_MIN);
             } catch (InterruptedException e) {
 //            msg("Woken up by flight attendant for landing procedure");
                 interrupt();
 
             }
         }
-//        waitToDepartPlane();
-
 
     }
 
     private void waitToDepartPlane() {
-        while (!isInterrupted()) {
+        while (!isInterrupted() && !isTimeToLeavePlane.get()) {
             try {
                 sleep(Main.THIRTY_MIN/10);
             } catch (InterruptedException e) {
@@ -260,20 +258,10 @@ public class PassengerThread extends Thread {
                 interrupt();
             }
         }
-        msg("Left plane to go on vacation");
 
 
     }
 
-    private void passengerJoin() {
-        if (this.isAlive()) {
-            try {
-                Main.passengers[id-1].join();
-            } catch (InterruptedException e) {
-                msg("Finished join");
-            }
-        }
-    }
 
 
 
