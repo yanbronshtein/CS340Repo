@@ -1,3 +1,4 @@
+import java.util.Collections;
 import java.util.Vector;
 
 /** This class simulates the behavior of the passenger thread
@@ -45,6 +46,7 @@ public class PassengerThread extends Thread {
         /* Passenger goes to the kiosk to print their pass */
         getBoardingPassAtKiosk();
 
+        sleepOnPlane();
 
 
     }
@@ -53,70 +55,58 @@ public class PassengerThread extends Thread {
     /** This method simulates the process of the passenger getting on line at one of the two counters to get their
      * boarding pass */
     private void getBoardingPassAtKiosk() {
-        Main.
-
-
-
-    }
-
-
-
-
-
-
-
-
-    /** This method simulates the passenger waiting at the gate to be processed by the flight attendant
-     * If the flight attendant has set the hasFinishedBoarding flag to true, and the passenger
-     * has exited the busy wait for that reason, then they were late and the thread should terminate naturally*/
-    private void waitAtGate() {
-        while (!isInterrupted()) {
+        Main.customers.release();
+        try {
+            Main.clerksAvailable.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        /* Chose a number from the front of the previously populated randomNumbersVec and remove it.
+        Assign a zone based on the seat number range  */
+        int seatNum = Main.randomNumbers.remove(0);
+        int zoneNum;
+        if (seatNum >= 0 && seatNum <= 10) {
+            zoneNum = 1;
             try {
-                sleep(Main.THIRTY_MIN/10);
-            }catch (InterruptedException e){
-// TMP COMMENT:               msg("Called by flight attend to scan boarding pass");
-                interrupt();
+                Main.zone1.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
-        /* After getting interrupted by the flight attendant the passenger goes to scan their boarding pass
-         * immediately prior to boarding the plane */
-        scanBoardingPass();
+        else if (seatNum >= 11 && seatNum <= 20) {
+            zoneNum = 2;
+            try {
+                Main.zone2.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
-//        if (passengerInfo.get(3) == -1) {
-//            msg("Passenger " + passengerInfo.get(0) + " has boarded the plane with zone " +
-//                    passengerInfo.get(1) + " seat " + passengerInfo.get(2) +
-//                    " group ID " + passengerInfo.get(3));
-//        }
+        }
+        else {
+            zoneNum = 3;
+            try {
+                Main.zone3.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        passengerInfo.set(1,zoneNum);
+        passengerInfo.set(2,seatNum);
+        msg("is in seat: " + seatNum + " and zone: " + zoneNum);
+
     }
-
 
 
     /** This method simulates the passenger sleeping on the plane for two hours until
      * being woken by the flight attendant to signal preparation for landing */
     private void sleepOnPlane() {
         try {
-            sleep(5 * Main.THIRTY_MIN);
+            Main.landing.acquire();
         } catch (InterruptedException e) {
-//  TMP COMMENT:          msg("Woken up by flight attendant for landing procedure");
-            interrupt();
+            e.printStackTrace();
         }
 
-        waitToDepartPlane();
     }
-
-    private void waitToDepartPlane() {
-        while (!isInterrupted()) {
-            try {
-                sleep(Main.THIRTY_MIN/10);
-            } catch (InterruptedException e) {
-                msg("Leaving plane");
-                interrupt();
-            }
-        }
-    }
-
-
-
 
 }
 

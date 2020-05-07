@@ -1,3 +1,5 @@
+import java.util.Collections;
+import java.util.Vector;
 import java.util.concurrent.Semaphore;
 
 /** This class contains the main method which creates a thread that in turn starts Clock, Kiosk Clerk, Flight Attendant,
@@ -40,7 +42,7 @@ public class Main {
     public static Semaphore timeToBoard = new Semaphore(0, true);
     /** Blocking semaphore controlled by Clock letting Flight attendant know to start landing process */
     public static Semaphore timeToLand = new Semaphore(0, true);
-
+    public static Vector<Integer> randomNumbers = generateRandomNumbers();
     /**main() method
      * @param args Single command line argument for the number of passengers */
     public static void main(String[] args) {
@@ -76,5 +78,16 @@ public class Main {
         /* Start flight attendant thread */
         flightAttendant.start();
 
+    }
+
+
+    /** This function creates a vector of all the numbers between 1 and 30 and shuffles them. */
+    private static Vector<Integer> generateRandomNumbers() {
+        Vector<Integer> vec = new Vector<>();
+        for (int i = 1; i <= 30; i++) {
+            vec.add(i);
+        }
+        Collections.shuffle(vec);
+        return vec;
     }
 }
