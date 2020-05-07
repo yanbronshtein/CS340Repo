@@ -10,7 +10,6 @@ public class ClockThread extends Thread {
     /** Specifies the total time given for the program to run in milliseconds */
     private static long totalTime;
 
-    public static AtomicBoolean isDepartureTime = new AtomicBoolean(false);
 
     /** Constructs the ClockThread
      * @param time total time given for this program in milliseconds */
@@ -36,29 +35,10 @@ public class ClockThread extends Thread {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        /*Notify flight attendant that it is time to board */
-        if (Main.flightAttendant.isAlive()) {
-            Main.flightAttendant.interrupt();
-        }
 
-        /* Sleep for 30 min of boarding time */
-        try {
-            sleep(Main.THIRTY_MIN);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        isDepartureTime.set(true);
-        msg("Time to interrupt clerks");
-//        for (KioskClerkThread clerk: Main.clerks) {
-//            clerk.interrupt();
-//        }
-        msg("Time to interrupt late passengers");
-        /* Terminate all passengers who have not been given a group id */
-//        for (PassengerThread passenger: Main.passengers) {
-//            if (passenger.passengerInfo.get(3) == -1) {
-//                passenger.interrupt();
-//            }
-//        }
+        Main.timeToBoard.release();
+
+
 
         //Sleep 2 hours( half an hour for boarding process and 2 hours until it is time for landing
         try {
@@ -67,12 +47,9 @@ public class ClockThread extends Thread {
             e.printStackTrace();
         }
 
-        //todo: Add code to signal passengers terminating
-
+        Main.timeToLand.release();
         msg("Clock terminating");
-//        for (PassengerThread passenger : Main.passengers) {
-//            passenger.interrupt();
-//        }
+
 
     }
 }

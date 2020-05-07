@@ -62,56 +62,18 @@ public class KioskClerkThread extends Thread {
      * Here the Kiosk Clerks deque passengers from their counters and assign them boarding passes  */
     @Override
     public void run() {
-        /* While the two Kiosk Clerks combined have not served all the passengers that arrived,
-         * we first check the id of the thread. If the id is 1 and the first queue is not empty, passengers
-         * are removed there
-         * if the id is 2 and the second queue is not empty passengers are removed from there
-         * In both cases, the assignBoardingPass() method is called on the passengers
-         * and the totalNumberPassengersServed is incremented   */
-        while (totalNumPassengersServed.get() < Main.numPassengers) {
-            if (id == 1 && !c1Queue.isEmpty()) {
-                PassengerThread servedPassenger = c1Queue.remove(0);
-                c1Size.getAndDecrement();
-                assignBoardingPass(servedPassenger);
-                totalNumPassengersServed.getAndIncrement();
-            }
-            if (id == 2 && !c2Queue.isEmpty()) {
-                PassengerThread servedPassenger = c2Queue.remove(0);
-                c2Size.getAndDecrement();
-                assignBoardingPass(servedPassenger);
-                totalNumPassengersServed.getAndIncrement();
-            }
+
+        try {
+            Main.customers.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-        /* As soon as the while loop is exited, the clerks are done for the day */
-// TMP COMMENT       msg("All passengers at counter " + id + " have been served. Thread Terminating");
+
+        Main.clerksAvailable.release();
 
 
         msg("All passengers at counter " + id + " have been served. Thread Terminating");
     }
 
-    /** This method is used by the KioskClerkThread to assign the passenger a boarding pass(seat and zone num)
-     * @param servedPassenger passenger serviced by KioskClerk */
-    private void assignBoardingPass(PassengerThread servedPassenger) {
-        /* Chose a number from the front of the previously populated randomNumbersVec and remove it.
-        Assign a zone based on the seat number range  */
-        int seatNum = randomNumbersVec.remove(0);
-        int zoneNum;
-        if (seatNum >= 0 && seatNum <= 10) {
-            zoneNum = 1;
-            z1KioskCount.getAndIncrement();
-        }
-        else if (seatNum >= 11 && seatNum <= 20) {
-            zoneNum = 2;
-            z2KioskCount.getAndIncrement();
-        }
-        else {
-            zoneNum = 3;
-            z3KioskCount.getAndIncrement();
-        }
 
-        /* Update the passenger info vector in the PassengerThread (position 1: zoneNum, position 2: seatNum) */
-        servedPassenger.passengerInfo.set(1, zoneNum);
-        servedPassenger.passengerInfo.set(2, seatNum);
-        msg(servedPassenger.getName() + ": is in seat " + seatNum + " and zone " + zoneNum);
-    }
 }
