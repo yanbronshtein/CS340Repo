@@ -10,7 +10,6 @@ public class ClockThread extends Thread {
     /** Specifies the total time given for the program to run in milliseconds */
     private static long totalTime;
 
-
     /** Constructs the ClockThread
      * @param time total time given for this program in milliseconds */
     public ClockThread(long time) {
@@ -29,29 +28,40 @@ public class ClockThread extends Thread {
 
     @Override
     public void run() {
-        /* Sleep for 2.5 hours */
+        /* Sleep for 2.5 hours needs to notify flight attendant that it is time to start the
+        boarding process */
         try {
-            sleep((Main.numPassengers)*Main.THIRTY_MIN);
+            sleep((5*Main.THIRTY_MIN));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Main.timeToBoard.release();
+
+
+        /* sleep for twenty minutes to let flight attendant know to close the plane door 10 minutes
+        * before take off */
+        try {
+            sleep(2*(Main.THIRTY_MIN/3));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Main.timeToCloseGate = true;
+
+        //todo: Figure out if this is correct
+        //Sleep 2 hours( half an hour for boarding process and 2 hours until it is time for landing
+        try {
+            sleep(4*Main.THIRTY_MIN);
+        }catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Main.gateClosed.acquire();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
 
-
-        Main.timeToBoard.release();
-
-
-
-        //Sleep 2 hours( half an hour for boarding process and 2 hours until it is time for landing
-        try {
-            // the two lines before will set a timer before
-            //the gate is completely closed
-            sleep(5*Main.THIRTY_MIN);
-            Main.gateClosed.acquire();
-            sleep(5*Main.THIRTY_MIN);
-        }catch (InterruptedException e) {
-            e.printStackTrace();
-        }
 
         Main.timeToLand.release();
         msg("Clock terminating");

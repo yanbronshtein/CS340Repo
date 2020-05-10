@@ -1,5 +1,4 @@
 import java.util.Vector;
-import java.util.concurrent.Semaphore;
 
 /** This class simulates the behavior of the Kiosk Clerk in an airport
  * @author Yaniv Bronshtein
@@ -57,7 +56,7 @@ public class KioskClerkThread extends Thread {
 
 
             try {
-                Main.customers.acquire();
+                Main.passengersAtKiosk.acquire();
                 msg("Currently Serving a Passenger");
                 sleep(5000);
                 msg("Passenger is Served");

@@ -1,6 +1,4 @@
-import java.util.Collections;
 import java.util.Vector;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /** This class simulates the behavior of the passenger thread
  * @author Yaniv Bronshtein
@@ -57,7 +55,7 @@ public class PassengerThread extends Thread {
     /** This method simulates the process of the passenger getting on line at one of the two counters to get their
      * boarding pass */
     private void getBoardingPassAtKiosk() {
-        Main.customers.release();
+        Main.passengersAtKiosk.release();
         try {
             Main.clerksAvailable.acquire();
         } catch (InterruptedException e) {
@@ -90,14 +88,14 @@ public class PassengerThread extends Thread {
             if (seatNum >= 0 && seatNum <= 10) {
                 zoneNum = 1;
                 try {
-                    Main.zone1.acquire();
+                    Main.zone1Queue.acquire();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             } else if (seatNum >= 11 && seatNum <= 20) {
                 zoneNum = 2;
                 try {
-                    Main.zone2.acquire();
+                    Main.zone2Queue.acquire();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -105,7 +103,7 @@ public class PassengerThread extends Thread {
             } else {
                 zoneNum = 3;
                 try {
-                    Main.zone3.acquire();
+                    Main.zone3Queue.acquire();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

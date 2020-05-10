@@ -30,14 +30,16 @@ public class Main {
     public static final long THIRTY_MIN = 2000;
     /** Clerk counting semaphore */
     public static Semaphore clerksAvailable = new Semaphore(0, true);
-    /** Customer Counting semaphore */
-    public static Semaphore customers = new Semaphore(0, true);
+    /** Passenger Counting semaphore */
+    public static Semaphore passengersAtKiosk = new Semaphore(0, true);
     /** Zone1 Queue */
-    public static Semaphore zone1 = new Semaphore(0, true);
+    public static Semaphore zone1Queue = new Semaphore(0, true);
     /** Zone2 Queue */
-    public static Semaphore zone2 = new Semaphore(0, true);
+    public static Semaphore zone2Queue = new Semaphore(0, true);
     /** Zone3 Queue */
-    public static Semaphore zone3 = new Semaphore(0, true);
+    public static Semaphore zone3Queue = new Semaphore(0, true);
+
+    public static Semaphore boardingPlaneQueue = new Semaphore(0, true);
     /** Binary semaphore released by the flight attendant letting the passengers know the plane is landing */
     public static Semaphore landing = new Semaphore(0, true);
     /** Blocking semaphore controlled by Clock letting Flight attendant know to start boarding process */
@@ -47,13 +49,8 @@ public class Main {
     public static Vector<Integer> randomNumbers = generateRandomNumbers();
     public static Semaphore mutexPassenger = new Semaphore(1, true);
     public static Semaphore mutexClerk = new Semaphore(1, true);
-
-
-
-
+    public static volatile boolean timeToCloseGate = false;
     public static Semaphore gateClosed = new Semaphore(0,true);
-
-
 
     /** Hashmap */
     public static HashMap<Integer, Semaphore> inOrderExiting = new HashMap<>();
@@ -85,9 +82,7 @@ public class Main {
         }
 
 
-        for (int i = 1; i <= 30; i++) {
-            inOrderExiting.put(i, new Semaphore(0, true));
-        }
+
         /* Start passenger threads */
         for (PassengerThread passenger : passengers) {
             passenger.start();
