@@ -7,10 +7,7 @@ import java.util.Vector;
 public class KioskClerkThread extends Thread {
     /** Time in thread at creation */
     public static long time = System.currentTimeMillis();
-    /** Vector that holds the passengers for the first kiosk counter */
-    public static final Vector<PassengerThread> c1Queue = new Vector<>(Main.counterNum);
-    /** Vector that holds the passengers for the second kiosk counter */
-    public static final Vector<PassengerThread> c2Queue = new Vector<>(Main.counterNum);
+
     public static int numPassengersServed = 0;
     /* Used by KioskClerk to access passengers served counter */
     /** ID of KioskClerkThread */
@@ -58,7 +55,7 @@ public class KioskClerkThread extends Thread {
             try {
                 Main.passengersAtKiosk.acquire();
                 msg("Currently Serving a Passenger");
-                sleep(5000);
+                sleep(5000); //todo:Sleep inside the clerk???
                 msg("Passenger is Served");
 
             } catch (InterruptedException e) {

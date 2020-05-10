@@ -55,12 +55,15 @@ public class PassengerThread extends Thread {
     /** This method simulates the process of the passenger getting on line at one of the two counters to get their
      * boarding pass */
     private void getBoardingPassAtKiosk() {
-        Main.passengersAtKiosk.release();
+
+        Main.passengersAtKiosk.release(); //Let clerk know that ready to receive ticket
+        /* Get on line with the clerk */
         try {
             Main.clerksAvailable.acquire();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        /* Choose ticket from the pool */
         try {
             Main.mutexPassenger.acquire();
         } catch (InterruptedException e) {
@@ -84,7 +87,7 @@ public class PassengerThread extends Thread {
         passengerInfo.set(2,seatNum);
         msg("seat number is: " + seatNum);
 
-        if(!isLate) {
+        if(!Main.isGateClosed) {
             if (seatNum >= 0 && seatNum <= 10) {
                 zoneNum = 1;
                 try {
@@ -119,11 +122,7 @@ public class PassengerThread extends Thread {
     /** This method simulates the passenger sleeping on the plane for two hours until
      * being woken by the flight attendant to signal preparation for landing */
     private void sleepOnPlane() {
-//        try {
-//            Main.landing.acquire();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
+
         //todo: Might need to add mutex here if all goes to shit
 //        AtomicInteger seatNum = new AtomicInteger(passengerInfo.get(2));
         int seatNum = passengerInfo.get(2);

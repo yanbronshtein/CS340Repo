@@ -55,6 +55,10 @@ public class FlightAttendantThread extends Thread {
                 e.printStackTrace();
             }
         }
+
+        Main.isGateClosed = true;
+
+        //todo: Tell Passengers to fuck off????
         //notify the clock-thread, hey its good to go, take off
         Main.gateClosed.release();
         //Announce to Passenger who are late
@@ -66,20 +70,7 @@ public class FlightAttendantThread extends Thread {
             e.printStackTrace();
         }
 
-        int firstPassengerSeat = 1;
-        while (!Main.inOrderExiting.get(firstPassengerSeat).hasQueuedThreads()) {
-            firstPassengerSeat++;
-            if (firstPassengerSeat > 30)
-                break;
-        }
-        if(firstPassengerSeat <= 30)
-        {
-            Main.inOrderExiting.get(firstPassengerSeat).release();
-        }
-
-        Main.landing.release();
         passengersDisembark();
-
         msg("Flight Attendant terminating");
     }
 
@@ -99,16 +90,24 @@ public class FlightAttendantThread extends Thread {
             int i = Main.groupNum; //Counter for number of passengers in group Can be at most 3
             groupID.getAndIncrement(); //Assign group to the next set of passengers
 
-
-                msg("Passenger " + boardingPassenger.passengerInfo.get(0) + " has boarded the plane with zone " +
-                        boardingPassenger.passengerInfo.get(1) + " seat " + boardingPassenger.passengerInfo.get(2) +
-                        " group ID " + boardingPassenger.passengerInfo.get(3));
-                i--;
-            }
         }
     }
 
+
     private void passengersDisembark() {
+
+        int firstPassengerSeat = 1;
+        while (!Main.inOrderExiting.get(firstPassengerSeat).hasQueuedThreads()) {
+            firstPassengerSeat++;
+            if (firstPassengerSeat > 30)
+                break;
+        }
+        if(firstPassengerSeat <= 30)
+        {
+            Main.inOrderExiting.get(firstPassengerSeat).release();
+        }
+
+        Main.landing.release();
         msg("Passengers have disembarked. Cleaning Plane");
 
     }

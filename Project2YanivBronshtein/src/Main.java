@@ -50,6 +50,8 @@ public class Main {
     public static Semaphore mutexPassenger = new Semaphore(1, true);
     public static Semaphore mutexClerk = new Semaphore(1, true);
     public static volatile boolean timeToCloseGate = false;
+    public static volatile boolean isGateClosed = false;
+
     public static Semaphore gateClosed = new Semaphore(0,true);
 
     /** Hashmap */
