@@ -54,7 +54,7 @@ public class Main {
     public static Semaphore passengerCanLeave = new Semaphore(0, true);
 
     public static Semaphore gateClosed = new Semaphore(0,true);
-
+    public static Semaphore flightAttendantDoneCleaning = new Semaphore(0, true);
     /** TreeSet */
     public static TreeMap<Integer, Semaphore> inOrderExiting = new TreeMap<>();
     /**main() method

@@ -50,7 +50,7 @@ public class FlightAttendantThread extends Thread {
         }
 
         Main.isGateClosed = true;
-        msg("Gates to enter the plane has closed");
+        msg("The plane door has closed. All remaining passengers please rebook your flights");
 
 //        //notify the clock-thread, hey its good to go, take off
 //        Main.gateClosed.release();
@@ -73,7 +73,9 @@ public class FlightAttendantThread extends Thread {
             e.printStackTrace();
         }
 
-        msg("Flight Attendant terminating");
+        msg("Done cleaning. Flight attendant terminating");
+        Main.flightAttendantDoneCleaning.release();
+
     }
 
     private static void handleBoarding(Semaphore sem) {

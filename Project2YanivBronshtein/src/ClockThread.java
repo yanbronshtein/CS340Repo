@@ -55,15 +55,13 @@ public class ClockThread extends Thread {
             e.printStackTrace();
         }
 
+        Main.timeToLand.release();
+        /* Wait for signal from flight attendant that they are done cleaning to terminate */
         try {
-            Main.gateClosed.acquire();
+            Main.flightAttendantDoneCleaning.acquire();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-
-
-        Main.timeToLand.release();
         msg("Clock terminating");
 
 
