@@ -1,3 +1,4 @@
+import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -65,6 +66,13 @@ public class FlightAttendantThread extends Thread {
         msg("All passengers aboard please prepare for landing");
 
         passengersDisembark();
+        msg("Passengers have left plane. Cleaning");
+        try {
+            sleep(Main.THIRTY_MIN);
+        }catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         msg("Flight Attendant terminating");
     }
 
@@ -94,10 +102,8 @@ public class FlightAttendantThread extends Thread {
 
 
     private void passengersDisembark() {
-
         while (!Main.inOrderExiting.isEmpty()) {
-            Main.inOrderExiting.pollFirst();
-
+            Main.inOrderExiting.pollFirstEntry().getValue().release();
         }
 
     }

@@ -17,7 +17,7 @@ public class Main {
     /** Number of passengers boarding plane. The max is 30 and the default is 30 but a number between 1 and 30 can be
      * provided by the user */
     //todo: change
-    public static int numPassengers =5;
+    public static int numPassengers = 30;
     /** Number of check-in counters */
     public static int numClerks = 2;
     /** Max number of people allowed at a time at the kiosk counters */
@@ -56,10 +56,24 @@ public class Main {
     public static Semaphore gateClosed = new Semaphore(0,true);
 
     /** TreeSet */
-    public static TreeSet<Integer> inOrderExiting = new TreeSet<>();
+    public static TreeMap<Integer, Semaphore> inOrderExiting = new TreeMap<>();
     /**main() method
      * @param args Single command line argument for the number of passengers */
     public static void main(String[] args) {
+
+        /* Command line argument validation */
+        if (args.length == 1) {
+            System.out.println("args provided: " + args[0]);
+            int tempVal;
+            try {
+                tempVal = Integer.parseInt(args[0]);
+            }catch (NumberFormatException e) {
+                throw new IllegalArgumentException("The number entered is an invalid integer");
+            }
+            if (tempVal < 1 || tempVal > 30)
+                throw new IllegalArgumentException("The number entered is not between 1 and 30");
+            numPassengers = tempVal;
+        }
         /*Create clock thread */
         clock = new ClockThread(12*THIRTY_MIN);
 

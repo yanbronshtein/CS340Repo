@@ -137,7 +137,7 @@ public class PassengerThread extends Thread {
             }
 
             /* Now that they have been released from the boardingPlane Queue, they can be put into the treemap for exiting */
-            Main.inOrderExiting.add(seatNum);
+            Main.inOrderExiting.put(seatNum, this.canLeavePlane);
             /* Waiting to leave */
             try {
                 Main.passengerCanLeave.acquire();
@@ -148,6 +148,11 @@ public class PassengerThread extends Thread {
             /* If they have been released they can enjoy their vacation */
 
 
+            try {
+                this.canLeavePlane.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         else
             msg("Couldn't get on the plane");
