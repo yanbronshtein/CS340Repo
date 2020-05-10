@@ -1,4 +1,5 @@
 import java.util.Vector;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /** This class simulates the behavior of the Flight Attendant in an airport
@@ -14,6 +15,7 @@ public class FlightAttendantThread extends Thread {
     /** This vector is used to contain passengers that made it on the flight */
     public static Vector<PassengerThread> planeQueue = new Vector<>(Main.numPassengers / 3);
 
+    /** bloooooop */
     /** Constructs a FlightAttendantThread and sets its name */
     public FlightAttendantThread() {
         setName("FlightAttendant-");
@@ -37,78 +39,66 @@ public class FlightAttendantThread extends Thread {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        int calledPassengersAtDoor = 0;
 
         //todo: Do this timed: Controlled by clock
         while (!Main.timeToCloseGate) {
-            while (Main.zone1Queue.hasQueuedThreads()) {
-                Main.zone1Queue.release();
-            }
-            while (Main.zone2Queue.hasQueuedThreads()) {
-                Main.zone2Queue.release();
-            }
-            while (Main.zone3Queue.hasQueuedThreads()) {
-                Main.zone3Queue.release();
-            }
-            try {
-                sleep(Main.THIRTY_MIN/2);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            handleBoarding(Main.zone1Queue);
+            handleBoarding(Main.zone2Queue);
+            handleBoarding(Main.zone3Queue);
         }
 
         Main.isGateClosed = true;
-
-        //todo: Tell Passengers to fuck off????
-        //notify the clock-thread, hey its good to go, take off
-        Main.gateClosed.release();
-        //Announce to Passenger who are late
         msg("Gates to enter the plane has closed");
 
+//        //notify the clock-thread, hey its good to go, take off
+//        Main.gateClosed.release();
+        //Announce to Passenger who are late
+
+        /* Sleep on plane and wait to be woken up by the clock for the landing procedure */
         try {
             Main.timeToLand.acquire();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
+        msg("All passengers aboard please prepare for landing");
+
         passengersDisembark();
         msg("Flight Attendant terminating");
     }
 
-    /** This method is used by the flight attendant to board passengers onto the plane
-     * @param zoneQueue for zones 1,2 or 3
-     * @param allowedTime long time allowed by the flight attendant for processing passengers in the zones
-     * This method is called twice on the same queues with two different allowedTimes*/
-    public void handleBoardingZone(Vector<PassengerThread> zoneQueue, long allowedTime) {
-        try {
-            Main.boardingPlaneQueue.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    private static void handleBoarding(Semaphore sem) {
 
-        /* Empty out entire atDoorQueue */
-        while (Main.boardingPlaneQueue.hasQueuedThreads()) {
-            int i = Main.groupNum; //Counter for number of passengers in group Can be at most 3
-            groupID.getAndIncrement(); //Assign group to the next set of passengers
-
+        while (sem.hasQueuedThreads()) {
+            sem.release(); //Release passenger to call them to the door
+            //todo: Should flight attendant use the same mutex as the passenger?
+            try {
+                Main.mutexPassenger.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (Main.boardingPassengerCount % 4 == 0 || !sem.hasQueuedThreads()) {
+                Main.mutexPassenger.release();
+                int i = 4;
+                /* Deque exactly 4 passengers or whatever is left */
+                while (i > 0 && !sem.hasQueuedThreads()) {
+                    Main.boardingPlaneQueue.release();
+                    i--;
+                }
+            }else {
+                Main.mutexPassenger.release();
+            }
         }
     }
 
 
     private void passengersDisembark() {
 
-        int firstPassengerSeat = 1;
-        while (!Main.inOrderExiting.get(firstPassengerSeat).hasQueuedThreads()) {
-            firstPassengerSeat++;
-            if (firstPassengerSeat > 30)
-                break;
-        }
-        if(firstPassengerSeat <= 30)
-        {
-            Main.inOrderExiting.get(firstPassengerSeat).release();
-        }
+        while (!Main.inOrderExiting.isEmpty()) {
+            Main.inOrderExiting.pollFirst();
 
-        Main.landing.release();
-        msg("Passengers have disembarked. Cleaning Plane");
+        }
 
     }
 }

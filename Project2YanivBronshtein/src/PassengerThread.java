@@ -1,4 +1,5 @@
 import java.util.Vector;
+import java.util.concurrent.Semaphore;
 
 /** This class simulates the behavior of the passenger thread
  * @author Yaniv Bronshtein
@@ -14,7 +15,7 @@ public class PassengerThread extends Thread {
     /** Time in thread upon creation */
     public static long time = System.currentTimeMillis();
     public static boolean isLate = false;
-
+    public Semaphore canLeavePlane = new Semaphore(0, true);
     /** Constructor creates thread with unique name and id  */
     public PassengerThread(int num) {
         int id = num + 1;
@@ -87,14 +88,17 @@ public class PassengerThread extends Thread {
         passengerInfo.set(2,seatNum);
         msg("seat number is: " + seatNum);
 
+        /* The passenger goes to wait in their zone queue semaphore  */
         if(!Main.isGateClosed) {
             if (seatNum >= 0 && seatNum <= 10) {
                 zoneNum = 1;
                 try {
                     Main.zone1Queue.acquire();
+                    /* Once they have been called by the flight attendant, they have  */
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+
             } else if (seatNum >= 11 && seatNum <= 20) {
                 zoneNum = 2;
                 try {
@@ -112,37 +116,49 @@ public class PassengerThread extends Thread {
                 }
             }
             msg("is in seat: " + seatNum + " and zone: " + zoneNum);
-            sleepOnPlane();
+//            sleepOnPlane();
+            /* Waiting to get in plane by group */
+
+
+            /* Acquire mutex to increment passenger counter */
+            try {
+                Main.mutexPassenger.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Main.boardingPassengerCount++;
+            Main.mutexPassenger.release();
+
+            /* Wait to leave with the group */
+            try {
+                Main.boardingPlaneQueue.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            /* Now that they have been released from the boardingPlane Queue, they can be put into the treemap for exiting */
+            Main.inOrderExiting.add(seatNum);
+            /* Waiting to leave */
+            try {
+                Main.passengerCanLeave.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            /* If they have been released they can enjoy their vacation */
+
+
         }
         else
             msg("Couldn't get on the plane");
     }
 
 
-    /** This method simulates the passenger sleeping on the plane for two hours until
-     * being woken by the flight attendant to signal preparation for landing */
+
+
+
+
     private void sleepOnPlane() {
-
-        //todo: Might need to add mutex here if all goes to shit
-//        AtomicInteger seatNum = new AtomicInteger(passengerInfo.get(2));
-        int seatNum = passengerInfo.get(2);
-        try {
-            Main.inOrderExiting.get(seatNum).acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        if (seatNum != 30) {
-            int nextSeat = seatNum + 1;
-            while (!Main.inOrderExiting.get(nextSeat).hasQueuedThreads()) {
-                nextSeat++;
-                if (nextSeat > 30)
-                    break;
-            }
-            if (nextSeat <= 30)
-                Main.inOrderExiting.get(nextSeat).release();
-        }
-        msg("Exited the plane");
 
     }
 

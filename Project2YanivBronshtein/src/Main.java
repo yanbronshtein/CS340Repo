@@ -1,6 +1,4 @@
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Vector;
+import java.util.*;
 import java.util.concurrent.Semaphore;
 
 /** This class contains the main method which creates a thread that in turn starts Clock, Kiosk Clerk, Flight Attendant,
@@ -49,13 +47,16 @@ public class Main {
     public static Vector<Integer> randomNumbers = generateRandomNumbers();
     public static Semaphore mutexPassenger = new Semaphore(1, true);
     public static Semaphore mutexClerk = new Semaphore(1, true);
+//    public static Semaphore mutexFlightAttendant = new Semaphore(1, true);
+    public static int boardingPassengerCount = 0;
     public static volatile boolean timeToCloseGate = false;
     public static volatile boolean isGateClosed = false;
+    public static Semaphore passengerCanLeave = new Semaphore(0, true);
 
     public static Semaphore gateClosed = new Semaphore(0,true);
 
-    /** Hashmap */
-    public static HashMap<Integer, Semaphore> inOrderExiting = new HashMap<>();
+    /** TreeSet */
+    public static TreeSet<Integer> inOrderExiting = new TreeSet<>();
     /**main() method
      * @param args Single command line argument for the number of passengers */
     public static void main(String[] args) {
