@@ -55,7 +55,18 @@ public class FlightAttendantThread extends Thread {
             e.printStackTrace();
         }
 
-        while (Main.zone1.hasQueuedThreads() || Main.zone2.hasQueuedThreads() || Main.zone3.hasQueuedThreads()) {
+//        while (Main.zone1.hasQueuedThreads() || Main.zone2.hasQueuedThreads() || Main.zone3.hasQueuedThreads()) {
+//            while (Main.zone1.hasQueuedThreads()) {
+//                Main.zone1.release();
+//            }
+//            while (Main.zone2.hasQueuedThreads()) {
+//                Main.zone2.release();
+//            }
+//            while (Main.zone3.hasQueuedThreads()) {
+//                Main.zone3.release();
+//            }
+//        }
+        while (!Main.gateClosed.hasQueuedThreads()) {
             while (Main.zone1.hasQueuedThreads()) {
                 Main.zone1.release();
             }
@@ -65,8 +76,12 @@ public class FlightAttendantThread extends Thread {
             while (Main.zone3.hasQueuedThreads()) {
                 Main.zone3.release();
             }
-
         }
+        //notify the clock-thread, hey its good to go, take off
+        Main.gateClosed.release();
+        //Announce to Passenger who are late
+        msg("Gates to enter the plane has closed");
+        PassengerThread.isLate = true;
 
         try {
             Main.timeToLand.acquire();
@@ -74,7 +89,19 @@ public class FlightAttendantThread extends Thread {
             e.printStackTrace();
         }
 
+        int firstPassengerSeat = 1;
+        while (!Main.inOrderExiting.get(firstPassengerSeat).hasQueuedThreads()) {
+            firstPassengerSeat++;
+            if (firstPassengerSeat > 30)
+                break;
+        }
+        if(firstPassengerSeat <= 30)
+        {
+            Main.inOrderExiting.get(firstPassengerSeat).release();
+        }
+
         Main.landing.release();
+
 //        /*First boarding phase: The Flight Attendant spends a quarter of 30 minutes boarding each zone equally */
 //        handleBoardingZone(z1Queue, Main.THIRTY_MIN/4);
 //        handleBoardingZone(z2Queue, Main.THIRTY_MIN/4);

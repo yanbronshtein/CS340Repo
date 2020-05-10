@@ -1,4 +1,5 @@
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Vector;
 import java.util.concurrent.Semaphore;
 
@@ -17,7 +18,8 @@ public class Main {
     public static FlightAttendantThread flightAttendant;
     /** Number of passengers boarding plane. The max is 30 and the default is 30 but a number between 1 and 30 can be
      * provided by the user */
-    public static int numPassengers =4;
+    //todo: change
+    public static int numPassengers =5;
     /** Number of check-in counters */
     public static int numClerks = 2;
     /** Max number of people allowed at a time at the kiosk counters */
@@ -27,7 +29,7 @@ public class Main {
     /** Constant specifying the time unit of 30 min as 2000 milliseconds  */
     public static final long THIRTY_MIN = 2000;
     /** Clerk counting semaphore */
-    public static Semaphore clerksAvailable = new Semaphore(2, true);
+    public static Semaphore clerksAvailable = new Semaphore(0, true);
     /** Customer Counting semaphore */
     public static Semaphore customers = new Semaphore(0, true);
     /** Zone1 Queue */
@@ -43,6 +45,18 @@ public class Main {
     /** Blocking semaphore controlled by Clock letting Flight attendant know to start landing process */
     public static Semaphore timeToLand = new Semaphore(0, true);
     public static Vector<Integer> randomNumbers = generateRandomNumbers();
+    public static Semaphore mutexPassenger = new Semaphore(1, true);
+    public static Semaphore mutexClerk = new Semaphore(1, true);
+
+
+
+
+    public static Semaphore gateClosed = new Semaphore(0,true);
+
+
+
+    /** Hashmap */
+    public static HashMap<Integer, Semaphore> inOrderExiting = new HashMap<>();
     /**main() method
      * @param args Single command line argument for the number of passengers */
     public static void main(String[] args) {
@@ -70,6 +84,10 @@ public class Main {
             clerk.start();
         }
 
+
+        for (int i = 1; i <= 30; i++) {
+            inOrderExiting.put(i, new Semaphore(0, true));
+        }
         /* Start passenger threads */
         for (PassengerThread passenger : passengers) {
             passenger.start();

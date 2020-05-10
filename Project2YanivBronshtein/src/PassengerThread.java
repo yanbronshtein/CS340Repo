@@ -1,5 +1,6 @@
 import java.util.Collections;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /** This class simulates the behavior of the passenger thread
  * @author Yaniv Bronshtein
@@ -14,15 +15,16 @@ public class PassengerThread extends Thread {
     public final Vector<Integer> passengerInfo = new Vector<>(3);
     /** Time in thread upon creation */
     public static long time = System.currentTimeMillis();
+    public static boolean isLate = false;
 
     /** Constructor creates thread with unique name and id  */
     public PassengerThread(int num) {
         int id = num + 1;
         setName("Passenger-" + id);
         passengerInfo.add(0, id); //id of passenger
-        passengerInfo.add(1, -1);
-        passengerInfo.add(2, -1);
-        passengerInfo.add(3, -1);
+        passengerInfo.add(1, -1); //zonenum
+        passengerInfo.add(2, -1); //seatnum
+        passengerInfo.add(3, -1); //groupnum
 
     }
 
@@ -46,7 +48,7 @@ public class PassengerThread extends Thread {
         /* Passenger goes to the kiosk to print their pass */
         getBoardingPassAtKiosk();
 
-        sleepOnPlane();
+
 
 
     }
@@ -61,50 +63,89 @@ public class PassengerThread extends Thread {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        try {
+            Main.mutexPassenger.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         /* Chose a number from the front of the previously populated randomNumbersVec and remove it.
         Assign a zone based on the seat number range  */
         int seatNum = Main.randomNumbers.remove(0);
+        Main.mutexPassenger.release();
         int zoneNum;
         if (seatNum >= 0 && seatNum <= 10) {
             zoneNum = 1;
-            try {
-                Main.zone1.acquire();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
         else if (seatNum >= 11 && seatNum <= 20) {
             zoneNum = 2;
-            try {
-                Main.zone2.acquire();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
         }
         else {
             zoneNum = 3;
-            try {
-                Main.zone3.acquire();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
         passengerInfo.set(1,zoneNum);
         passengerInfo.set(2,seatNum);
-        msg("is in seat: " + seatNum + " and zone: " + zoneNum);
+        msg("seat number is: " + seatNum);
 
+        if(!isLate) {
+            if (seatNum >= 0 && seatNum <= 10) {
+                zoneNum = 1;
+                try {
+                    Main.zone1.acquire();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } else if (seatNum >= 11 && seatNum <= 20) {
+                zoneNum = 2;
+                try {
+                    Main.zone2.acquire();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            } else {
+                zoneNum = 3;
+                try {
+                    Main.zone3.acquire();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            msg("is in seat: " + seatNum + " and zone: " + zoneNum);
+            sleepOnPlane();
+        }
+        else
+            msg("Couldn't get on the plane");
     }
 
 
     /** This method simulates the passenger sleeping on the plane for two hours until
      * being woken by the flight attendant to signal preparation for landing */
     private void sleepOnPlane() {
+//        try {
+//            Main.landing.acquire();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+        //todo: Might need to add mutex here if all goes to shit
+//        AtomicInteger seatNum = new AtomicInteger(passengerInfo.get(2));
+        int seatNum = passengerInfo.get(2);
         try {
-            Main.landing.acquire();
+            Main.inOrderExiting.get(seatNum).acquire();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        if (seatNum != 30) {
+            int nextSeat = seatNum + 1;
+            while (!Main.inOrderExiting.get(nextSeat).hasQueuedThreads()) {
+                nextSeat++;
+                if (nextSeat > 30)
+                    break;
+            }
+            if (nextSeat <= 30)
+                Main.inOrderExiting.get(nextSeat).release();
+        }
+        msg("Exited the plane");
 
     }
 

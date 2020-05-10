@@ -1,6 +1,5 @@
-import java.util.Collections;
 import java.util.Vector;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.Semaphore;
 
 /** This class simulates the behavior of the Kiosk Clerk in an airport
  * @author Yaniv Bronshtein
@@ -13,23 +12,11 @@ public class KioskClerkThread extends Thread {
     public static final Vector<PassengerThread> c1Queue = new Vector<>(Main.counterNum);
     /** Vector that holds the passengers for the second kiosk counter */
     public static final Vector<PassengerThread> c2Queue = new Vector<>(Main.counterNum);
-    /** Total number of passengers served by both clerks */
-//    public static int totalNumberPassengersServed;
-    public static AtomicInteger totalNumPassengersServed = new AtomicInteger(0);
+    public static int numPassengersServed = 0;
+    /* Used by KioskClerk to access passengers served counter */
     /** ID of KioskClerkThread */
     final int id;
-    /** Vector that contains a list of randomized seat numbers */
-    private static Vector<Integer> randomNumbersVec = new Vector<>(30);
-    /** Number of passengers belonging to zone 1 processed by kiosk clerk */
-    public static AtomicInteger z1KioskCount = new AtomicInteger(0);
-    /** Number of passengers belonging to zone 2 processed by kiosk clerk */
-    public static AtomicInteger z2KioskCount = new AtomicInteger(0);
-    /** Number of passengers belonging to zone 3 processed by kiosk clerk */
-    public static AtomicInteger z3KioskCount = new AtomicInteger(0);
-    /** Counter of passengers waiting on line at the first counter */
-    public static AtomicInteger c1Size = new AtomicInteger(0);
-    /** Counter of passengers waiting on line at the second counter */
-    public static AtomicInteger c2Size = new AtomicInteger(0);
+
 
     /** Constructor creates a KioskClerkThread. the name of the thread is initialized as well the totalNumPassengersServed.
      * The generateRandomNumbers() function is called to generateRandomNumbers for boarding pass seat numbers
@@ -37,18 +24,10 @@ public class KioskClerkThread extends Thread {
     public KioskClerkThread(int num) {
         id = num + 1;
         setName("KioskClerk-" + id);
-        randomNumbersVec = generateRandomNumbers();
     }
 
-    /** This function creates a vector of all the numbers between 1 and 30 and shuffles them. */
-    private Vector<Integer> generateRandomNumbers() {
-        Vector<Integer> vec = new Vector<>();
-        for (int i = 1; i <= 30; i++) {
-            vec.add(i);
-        }
-        Collections.shuffle(vec);
-        return vec;
-    }
+
+
 
 
     /** This method is used to display messages by the thread onto the console including the current
@@ -62,14 +41,36 @@ public class KioskClerkThread extends Thread {
      * Here the Kiosk Clerks deque passengers from their counters and assign them boarding passes  */
     @Override
     public void run() {
+        while(true) {
+            try {
+                Main.mutexClerk.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
-        try {
-            Main.customers.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            if(numPassengersServed== Main.numPassengers) {
+                Main.mutexClerk.release();
+                break;
+            }
+            numPassengersServed++;
+            Main.mutexClerk.release();
+
+
+            try {
+                Main.customers.acquire();
+                msg("Currently Serving a Passenger");
+                sleep(5000);
+                msg("Passenger is Served");
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+
+            Main.clerksAvailable.release();
         }
 
-        Main.clerksAvailable.release();
+
 
 
         msg("All passengers at counter " + id + " have been served. Thread Terminating");

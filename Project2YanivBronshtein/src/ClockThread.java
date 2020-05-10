@@ -31,10 +31,12 @@ public class ClockThread extends Thread {
     public void run() {
         /* Sleep for 2.5 hours */
         try {
-            sleep(5*Main.THIRTY_MIN);
+            sleep((Main.numPassengers)*Main.THIRTY_MIN);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+
 
         Main.timeToBoard.release();
 
@@ -42,6 +44,10 @@ public class ClockThread extends Thread {
 
         //Sleep 2 hours( half an hour for boarding process and 2 hours until it is time for landing
         try {
+            // the two lines before will set a timer before
+            //the gate is completely closed
+            sleep(5*Main.THIRTY_MIN);
+            Main.gateClosed.acquire();
             sleep(5*Main.THIRTY_MIN);
         }catch (InterruptedException e) {
             e.printStackTrace();
