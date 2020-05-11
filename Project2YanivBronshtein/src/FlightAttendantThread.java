@@ -52,9 +52,6 @@ public class FlightAttendantThread extends Thread {
         Main.isGateClosed = true;
         msg("The plane door has closed. All remaining passengers please rebook your flights");
 
-//        //notify the clock-thread, hey its good to go, take off
-//        Main.gateClosed.release();
-        //Announce to Passenger who are late
 
         /* Sleep on plane and wait to be woken up by the clock for the landing procedure */
         try {
@@ -100,12 +97,20 @@ public class FlightAttendantThread extends Thread {
                 Main.mutexPassenger.release();
             }
         }
+        while(sem.hasQueuedThreads())
+        {
+            sem.release();
+        }
     }
+
+    public void letPassengerEnterPlane()
 
 
     private void passengersDisembark() {
         while (!Main.inOrderExiting.isEmpty()) {
-            Main.inOrderExiting.pollFirstEntry().getValue().release();
+            Map.Entry<Integer, Semaphore> entry = Main.inOrderExiting.pollFirstEntry();
+            msg("Passenger in seat" + entry.getKey() + "has departed the plane");
+            entry.getValue().release();
         }
 
     }

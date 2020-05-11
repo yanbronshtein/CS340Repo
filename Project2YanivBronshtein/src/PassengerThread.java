@@ -86,48 +86,47 @@ public class PassengerThread extends Thread {
         }
         passengerInfo.set(1,zoneNum);
         passengerInfo.set(2,seatNum);
-        msg("seat number is: " + seatNum);
+        msg("Seat Number given by clerk: " + seatNum);
 
         /* The passenger goes to wait in their zone queue semaphore  */
         if(!Main.isGateClosed) {
-            if (seatNum >= 0 && seatNum <= 10) {
-                zoneNum = 1;
-                try {
-                    Main.zone1Queue.acquire();
-                    /* Once they have been called by the flight attendant, they have  */
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-            } else if (seatNum >= 11 && seatNum <= 20) {
-                zoneNum = 2;
-                try {
-                    Main.zone2Queue.acquire();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-            } else {
-                zoneNum = 3;
-                try {
-                    Main.zone3Queue.acquire();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            switch (zoneNum) {
+                case 1:
+                    try {
+                        Main.zone1Queue.acquire();
+                        /* Once they have been called by the flight attendant, they have  */
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    msg("Called by flight attendant in zone 1");
+                    break;
+                case 2:
+                    try {
+                        Main.zone2Queue.acquire();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    msg("Called by flight attendant in zone 2");
+                    break;
+                default:
+                    try {
+                        Main.zone3Queue.acquire();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    msg("Called by flight attendant in zone 3");
+                    break;
             }
-            msg("is in seat: " + seatNum + " and zone: " + zoneNum);
-//            sleepOnPlane();
-            /* Waiting to get in plane by group */
-
+            msg("is on the plane in seat: " + seatNum + " and zone: " + zoneNum);
 
             /* Acquire mutex to increment passenger counter */
-            try {
-                Main.mutexPassenger.acquire();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            Main.boardingPassengerCount++;
-            Main.mutexPassenger.release();
+//            try {
+//                Main.mutexPassenger.acquire();
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//            Main.boardingPassengerCount++;
+//            Main.mutexPassenger.release();
 
             /* Wait to leave with the group */
             try {
@@ -136,23 +135,19 @@ public class PassengerThread extends Thread {
                 e.printStackTrace();
             }
 
+
             /* Now that they have been released from the boardingPlane Queue, they can be put into the treemap for exiting */
             Main.inOrderExiting.put(seatNum, this.canLeavePlane);
             /* Waiting to leave */
-            try {
-                Main.passengerCanLeave.acquire();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+
+//            try {
+//                this.canLeavePlane.acquire();
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
 
             /* If they have been released they can enjoy their vacation */
-
-
-            try {
-                this.canLeavePlane.acquire();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            msg("Going on vacation boo ya ka sha");
         }
         else
             msg("Couldn't get on the plane");
@@ -163,9 +158,7 @@ public class PassengerThread extends Thread {
 
 
 
-    private void sleepOnPlane() {
 
-    }
 
 }
 
