@@ -40,18 +40,15 @@ public class FlightAttendantThread extends Thread {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        int calledPassengersAtDoor = 0;
 
-        //todo: Do this timed: Controlled by clock
-        while (!Main.timeToCloseGate) {
-            handleBoarding(Main.zone1Queue);
-            handleBoarding(Main.zone2Queue);
-            handleBoarding(Main.zone3Queue);
-        }
+
+        callPassengersByZone(Main.zone1Queue);
+        callPassengersByZone(Main.zone2Queue);
+        callPassengersByZone(Main.zone3Queue);
+
 
         Main.isGateClosed = true;
         msg("The plane door has closed. All remaining passengers please rebook your flights");
-
 
         /* Sleep on plane and wait to be woken up by the clock for the landing procedure */
         try {
@@ -75,41 +72,27 @@ public class FlightAttendantThread extends Thread {
 
     }
 
-    private static void handleBoarding(Semaphore sem) {
+    private static void callPassengersByZone(Semaphore zoneQueue) {
 
-        while (sem.hasQueuedThreads()) {
-            sem.release(); //Release passenger to call them to the door
-            //todo: Should flight attendant use the same mutex as the passenger?
-            try {
-                Main.mutexPassenger.acquire();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            if (Main.boardingPassengerCount % 4 == 0 || !sem.hasQueuedThreads()) {
-                Main.mutexPassenger.release();
-                int i = 4;
-                /* Deque exactly 4 passengers or whatever is left */
-                while (i > 0 && !sem.hasQueuedThreads()) {
+        while(zoneQueue.hasQueuedThreads())
+            zoneQueue.release();
+
+
+        while (Main.boardingPlaneQueue.hasQueuedThreads()) {
+            int boardingQueueLength = Main.boardingPlaneQueue.getQueueLength();
+            if (boardingQueueLength % Main.groupNum == 0 || boardingQueueLength < Main.groupNum) {
+                int counter = (boardingQueueLength % Main.groupNum == 0) ? Main.groupNum : boardingQueueLength;
+
+                for (int i = 0; i < counter; i++)
                     Main.boardingPlaneQueue.release();
-                    i--;
-                }
-            }else {
-                Main.mutexPassenger.release();
             }
-        }
-        while(sem.hasQueuedThreads())
-        {
-            sem.release();
         }
     }
-
-    public void letPassengerEnterPlane()
-
 
     private void passengersDisembark() {
         while (!Main.inOrderExiting.isEmpty()) {
             Map.Entry<Integer, Semaphore> entry = Main.inOrderExiting.pollFirstEntry();
-            msg("Passenger in seat" + entry.getKey() + "has departed the plane");
+//            msg("Passenger in seat" + entry.getKey() + "has departed the plane");
             entry.getValue().release();
         }
 

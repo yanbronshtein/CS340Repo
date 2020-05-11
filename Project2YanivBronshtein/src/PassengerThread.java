@@ -86,7 +86,7 @@ public class PassengerThread extends Thread {
         }
         passengerInfo.set(1,zoneNum);
         passengerInfo.set(2,seatNum);
-        msg("Seat Number given by clerk: " + seatNum);
+        msg("Received boarding pass from clerk with seat number: " + seatNum + " and zone number:" + zoneNum);
 
         /* The passenger goes to wait in their zone queue semaphore  */
         if(!Main.isGateClosed) {
@@ -98,7 +98,7 @@ public class PassengerThread extends Thread {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    msg("Called by flight attendant in zone 1");
+//                    msg("Called by flight attendant in zone 1");
                     break;
                 case 2:
                     try {
@@ -106,7 +106,7 @@ public class PassengerThread extends Thread {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    msg("Called by flight attendant in zone 2");
+//                    msg("Called by flight attendant in zone 2");
                     break;
                 default:
                     try {
@@ -114,40 +114,29 @@ public class PassengerThread extends Thread {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    msg("Called by flight attendant in zone 3");
+//                    msg("Called by flight attendant in zone 3");
                     break;
             }
-            msg("is on the plane in seat: " + seatNum + " and zone: " + zoneNum);
 
-            /* Acquire mutex to increment passenger counter */
-//            try {
-//                Main.mutexPassenger.acquire();
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//            Main.boardingPassengerCount++;
-//            Main.mutexPassenger.release();
-
-            /* Wait to leave with the group */
+            /* Wait to board plane after being called by flight attendant */
             try {
                 Main.boardingPlaneQueue.acquire();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
-
             /* Now that they have been released from the boardingPlane Queue, they can be put into the treemap for exiting */
             Main.inOrderExiting.put(seatNum, this.canLeavePlane);
-            /* Waiting to leave */
+            /* Waiting to leave the plane */
+            try {
+                canLeavePlane.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            msg("in seat: " + seatNum + " has left the plane");
 
-//            try {
-//                this.canLeavePlane.acquire();
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
 
             /* If they have been released they can enjoy their vacation */
-            msg("Going on vacation boo ya ka sha");
         }
         else
             msg("Couldn't get on the plane");

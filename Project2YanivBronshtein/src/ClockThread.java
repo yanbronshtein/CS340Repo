@@ -37,17 +37,6 @@ public class ClockThread extends Thread {
         }
         Main.timeToBoard.release();
 
-
-        /* sleep for twenty minutes to let flight attendant know to close the plane door 10 minutes
-        * before take off */
-        try {
-            sleep(2*(Main.THIRTY_MIN/3));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        Main.timeToCloseGate = true;
-
-        //todo: Figure out if this is correct
         //Sleep 2 hours( half an hour for boarding process and 2 hours until it is time for landing
         try {
             sleep(4*Main.THIRTY_MIN);

@@ -55,7 +55,7 @@ public class KioskClerkThread extends Thread {
             try {
                 Main.passengersAtKiosk.acquire();
                 msg("Currently Serving a Passenger");
-                sleep(5000); //todo:Sleep inside the clerk???
+                sleep(20);
                 msg("Passenger is Served");
 
             } catch (InterruptedException e) {
@@ -65,9 +65,6 @@ public class KioskClerkThread extends Thread {
 
             Main.clerksAvailable.release();
         }
-
-
-
 
         msg("All passengers at counter " + id + " have been served. Thread Terminating");
     }
