@@ -119,21 +119,39 @@ public class PassengerThread extends Thread {
             }
 
             /* Wait to board plane after being called by flight attendant */
-            try {
-                Main.boardingPlaneQueue.acquire();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            if(!Main.isGateClosed) {
+                Main.customerEnteringPlane.release();
+                try {
+                    msg("Waiting on gate");
+                    Main.boardingPlaneQueue.acquire();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                msg("got on the plane");
+                Main.customerEnteringPlane.release();
 
-            /* Now that they have been released from the boardingPlane Queue, they can be put into the treemap for exiting */
-            Main.inOrderExiting.put(seatNum, this.canLeavePlane);
-            /* Waiting to leave the plane */
-            try {
-                canLeavePlane.acquire();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                /* Now that they have been released from the boardingPlane Queue, they can be put into the treemap for exiting */
+                try{
+                    Main.mutexPassenger.acquire();
+                }
+                catch(InterruptedException e)
+                {
+                    e.printStackTrace();
+                }
+                Main.inOrderExiting.put(seatNum, this.canLeavePlane);
+                Main.mutexPassenger.release();
+                /* Waiting to leave the plane */
+                try {
+                    this.canLeavePlane.acquire();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                msg("in seat: " + seatNum + " has left the plane");
             }
-            msg("in seat: " + seatNum + " has left the plane");
+            else
+            {
+                msg("Couldn't get on the plane");
+            }
 
 
             /* If they have been released they can enjoy their vacation */

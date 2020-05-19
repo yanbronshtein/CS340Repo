@@ -48,11 +48,24 @@ public class FlightAttendantThread extends Thread {
 
 
         Main.isGateClosed = true;
+        while(Main.zone1Queue.hasQueuedThreads())
+        {
+            Main.zone1Queue.release();
+        }
+        while(Main.zone2Queue.hasQueuedThreads())
+        {
+            Main.zone2Queue.release();
+        }
+        while(Main.zone3Queue.hasQueuedThreads())
+        {
+            Main.zone3Queue.release();
+        }
         msg("The plane door has closed. All remaining passengers please rebook your flights");
 
         /* Sleep on plane and wait to be woken up by the clock for the landing procedure */
         try {
             Main.timeToLand.acquire();
+            sleep(4000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -77,6 +90,14 @@ public class FlightAttendantThread extends Thread {
         while(zoneQueue.hasQueuedThreads())
             zoneQueue.release();
 
+        try{
+            sleep(4000);
+        }
+        catch(InterruptedException e)
+        {
+            e.printStackTrace();
+        }
+
 
         while (Main.boardingPlaneQueue.hasQueuedThreads()) {
             int boardingQueueLength = Main.boardingPlaneQueue.getQueueLength();
@@ -93,8 +114,21 @@ public class FlightAttendantThread extends Thread {
         while (!Main.inOrderExiting.isEmpty()) {
             Map.Entry<Integer, Semaphore> entry = Main.inOrderExiting.pollFirstEntry();
 //            msg("Passenger in seat" + entry.getKey() + "has departed the plane");
+            try {
+                sleep(200);
+            } catch(InterruptedException e)
+            {
+                e.printStackTrace();
+            }
             entry.getValue().release();
         }
+        /*for(Integer i=1; i<=30; i++)
+        {
+            if(Main.inOrderExiting.containsKey(i))
+            {
+                Main.inOrderExiting.get(i).release();
+            }
+        }*/
 
     }
 }

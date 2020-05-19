@@ -31,7 +31,7 @@ public class ClockThread extends Thread {
         /* Sleep for 2.5 hours needs to notify flight attendant that it is time to start the
         boarding process */
         try {
-            sleep((5*Main.THIRTY_MIN));
+            sleep(5*Main.THIRTY_MIN);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

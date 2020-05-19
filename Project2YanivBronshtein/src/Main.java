@@ -52,6 +52,7 @@ public class Main {
     public static volatile boolean timeToCloseGate = false;
     public static volatile boolean isGateClosed = false;
 
+    public static Semaphore customerEnteringPlane = new Semaphore(0, true);
     public static Semaphore gateClosed = new Semaphore(0,true);
     public static Semaphore flightAttendantDoneCleaning = new Semaphore(0, true);
     /** TreeSet */
