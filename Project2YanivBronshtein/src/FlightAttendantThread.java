@@ -5,18 +5,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /** This class simulates the behavior of the Flight Attendant in an airport
  * @author Yaniv Bronshtein
- * @version 1.0*/
+ * @version 2.0*/
 public class FlightAttendantThread extends Thread {
     /** Time recorded by each FlightAttendantThread upon creation */
     public static long time = System.currentTimeMillis();
-    /** Variable to hold the group ID assigned by the flight attendant to passengers boarding the plane */
-    //todo: Figure out if I really need a group ID here that is atomic!!!
-    public static AtomicInteger groupID = new AtomicInteger(0);
 
-    /** This vector is used to contain passengers that made it on the flight */
-    public static Vector<PassengerThread> planeQueue = new Vector<>(Main.numPassengers / 3);
-
-    /** bloooooop */
     /** Constructs a FlightAttendantThread and sets its name */
     public FlightAttendantThread() {
         setName("FlightAttendant-");
@@ -30,7 +23,7 @@ public class FlightAttendantThread extends Thread {
     }
 
     /** This method is executed when the thread is started in the main method in the Main class
-     * and simulates the behavior of the Flight Attendant including boarding closing the door, announcing to
+     * and simulates the behavior of the Flight Attendant including boarding, closing the door, announcing to
      * passengers that the plane is landing and cleaning up after the passengers*/
     @Override
     public void run() {
@@ -41,23 +34,23 @@ public class FlightAttendantThread extends Thread {
             e.printStackTrace();
         }
 
-
+        /* Call the passengers once by zone */
         callPassengersByZone(Main.zone1Queue);
         callPassengersByZone(Main.zone2Queue);
         callPassengersByZone(Main.zone3Queue);
 
+/*Set this boolean variable to true to let passengers know not to put wait on zone queue */
+        Main.isGateClosed = true; //todo: do i need this
 
-        Main.isGateClosed = true;
-        while(Main.zone1Queue.hasQueuedThreads())
-        {
+
+        /* Release all the left over passengers from their zone queues  */
+        while(Main.zone1Queue.hasQueuedThreads()) {
             Main.zone1Queue.release();
         }
-        while(Main.zone2Queue.hasQueuedThreads())
-        {
+        while(Main.zone2Queue.hasQueuedThreads()) {
             Main.zone2Queue.release();
         }
-        while(Main.zone3Queue.hasQueuedThreads())
-        {
+        while(Main.zone3Queue.hasQueuedThreads()) {
             Main.zone3Queue.release();
         }
         msg("The plane door has closed. All remaining passengers please rebook your flights");
@@ -72,7 +65,7 @@ public class FlightAttendantThread extends Thread {
 
         msg("All passengers aboard please prepare for landing");
 
-        passengersDisembark();
+        passengersDisembark(); //Call this method to remove the passengers from the TreeMap
         msg("Passengers have left plane. Cleaning");
         try {
             sleep(Main.THIRTY_MIN);
@@ -81,23 +74,28 @@ public class FlightAttendantThread extends Thread {
         }
 
         msg("Done cleaning. Flight attendant terminating");
-        Main.flightAttendantDoneCleaning.release();
-
+        Main.flightAttendantDoneCleaning.release(); //Let the clock know to terminate
     }
 
-    private static void callPassengersByZone(Semaphore zoneQueue) {
 
+    /** This method takes a zone queue all the blocked processes(passengers) waiting for it
+     * In the passenger thread, the passengers add themselves to the boardingPlaneQueue.
+     * After that is done, the flight attendant releases the blocked processes from the queue according to the
+     * following rule: if the number of passengers in the boardingPlaneQueue is 4 or divisible by 4,
+     * they are released. If there are less than 4 passengers left total in the boardingPlaneQueue,
+     * all of these are released
+     *
+     * @param zoneQueue queue of blocked passenger processes waiting at the gate*/
+    private static void callPassengersByZone(Semaphore zoneQueue) {
         while(zoneQueue.hasQueuedThreads())
             zoneQueue.release();
 
         try{
             sleep(4000);
         }
-        catch(InterruptedException e)
-        {
+        catch(InterruptedException e) {
             e.printStackTrace();
         }
-
 
         while (Main.boardingPlaneQueue.hasQueuedThreads()) {
             int boardingQueueLength = Main.boardingPlaneQueue.getQueueLength();
@@ -122,13 +120,6 @@ public class FlightAttendantThread extends Thread {
             }
             entry.getValue().release();
         }
-        /*for(Integer i=1; i<=30; i++)
-        {
-            if(Main.inOrderExiting.containsKey(i))
-            {
-                Main.inOrderExiting.get(i).release();
-            }
-        }*/
 
     }
 }

@@ -1,20 +1,16 @@
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /** This class simulates the behavior of the System clock that is meant to control the behavior of the flight attendant
  *  and interrupt any blocked threads at the end of the program
  * @author Yaniv Bronshtein
- * @version 1.0*/
+ * @version 2.0*/
 public class ClockThread extends Thread {
     /** Specifies the current time in the thread */
     public static long time = System.currentTimeMillis();
-    /** Specifies the total time given for the program to run in milliseconds */
-    private static long totalTime;
 
     /** Constructs the ClockThread
-     * @param time total time given for this program in milliseconds */
-    public ClockThread(long time) {
+     *  */
+    public ClockThread() {
         setName("Clock-");
-        totalTime = time;
     }
 
     /** This method is used to display messages by the thread onto the console including the current
@@ -24,8 +20,7 @@ public class ClockThread extends Thread {
         System.out.println("[" + (System.currentTimeMillis() - time) + "]" + getName() + ":" + m);
     }
 
-
-
+    /* Run method of the Clock thread */
     @Override
     public void run() {
         /* Sleep for 2.5 hours needs to notify flight attendant that it is time to start the
@@ -37,14 +32,14 @@ public class ClockThread extends Thread {
         }
         Main.timeToBoard.release();
 
-        //Sleep 2 hours( half an hour for boarding process and 2 hours until it is time for landing
+        /*Sleep 2.5 hours( half an hour for boarding process and 2 hours until it is time for landing) */
         try {
-            sleep(4*Main.THIRTY_MIN);
+            sleep(5*Main.THIRTY_MIN);
         }catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        Main.timeToLand.release();
+        Main.timeToLand.release(); //Used to wakeup flight attendant to begin landing procedure
         /* Wait for signal from flight attendant that they are done cleaning to terminate */
         try {
             Main.flightAttendantDoneCleaning.acquire();
@@ -52,7 +47,6 @@ public class ClockThread extends Thread {
             e.printStackTrace();
         }
         msg("Clock terminating");
-
 
     }
 }

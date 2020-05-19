@@ -4,7 +4,7 @@ import java.util.concurrent.Semaphore;
 /** This class contains the main method which creates a thread that in turn starts Clock, Kiosk Clerk, Flight Attendant,
  * and passenger threads
  * @author Yaniv Bronshtein
- * @version 1.0*/
+ * @version 2.0*/
 public class Main {
     /**Single clock thread */
     public static ClockThread clock;
@@ -16,12 +16,9 @@ public class Main {
     public static FlightAttendantThread flightAttendant;
     /** Number of passengers boarding plane. The max is 30 and the default is 30 but a number between 1 and 30 can be
      * provided by the user */
-    //todo: change
     public static int numPassengers = 30;
     /** Number of check-in counters */
     public static int numClerks = 2;
-    /** Max number of people allowed at a time at the kiosk counters */
-    public static int counterNum = 3;
     /** Max number of allowed passengers in a group boarding the plane */
     public static int groupNum = 4;
     /** Constant specifying the time unit of 30 min as 2000 milliseconds  */
@@ -38,8 +35,7 @@ public class Main {
     public static Semaphore zone3Queue = new Semaphore(0, true);
 
     public static Semaphore boardingPlaneQueue = new Semaphore(0, true);
-    /** Binary semaphore released by the flight attendant letting the passengers know the plane is landing */
-    public static Semaphore landing = new Semaphore(0, true);
+
     /** Blocking semaphore controlled by Clock letting Flight attendant know to start boarding process */
     public static Semaphore timeToBoard = new Semaphore(0, true);
     /** Blocking semaphore controlled by Clock letting Flight attendant know to start landing process */
@@ -47,13 +43,9 @@ public class Main {
     public static Vector<Integer> randomNumbers = generateRandomNumbers();
     public static Semaphore mutexPassenger = new Semaphore(1, true);
     public static Semaphore mutexClerk = new Semaphore(1, true);
-//    public static Semaphore mutexFlightAttendant = new Semaphore(1, true);
-    public static int boardingPassengerCount = 0;
-    public static volatile boolean timeToCloseGate = false;
     public static volatile boolean isGateClosed = false;
 
     public static Semaphore customerEnteringPlane = new Semaphore(0, true);
-    public static Semaphore gateClosed = new Semaphore(0,true);
     public static Semaphore flightAttendantDoneCleaning = new Semaphore(0, true);
     /** TreeSet */
     public static TreeMap<Integer, Semaphore> inOrderExiting = new TreeMap<>();
@@ -75,7 +67,7 @@ public class Main {
             numPassengers = tempVal;
         }
         /*Create clock thread */
-        clock = new ClockThread(12*THIRTY_MIN);
+        clock = new ClockThread();
 
         /* Create clerk threads */
         clerks = new KioskClerkThread[numClerks]; //only two clerks
