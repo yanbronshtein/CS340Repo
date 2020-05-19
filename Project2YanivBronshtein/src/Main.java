@@ -33,26 +33,31 @@ public class Main {
     public static Semaphore zone2Queue = new Semaphore(0, true);
     /** Zone3 Queue */
     public static Semaphore zone3Queue = new Semaphore(0, true);
-
+    /* Queue for passengers waiting at the door to enter in groups of groupNum */
     public static Semaphore boardingPlaneQueue = new Semaphore(0, true);
-
     /** Blocking semaphore controlled by Clock letting Flight attendant know to start boarding process */
     public static Semaphore timeToBoard = new Semaphore(0, true);
     /** Blocking semaphore controlled by Clock letting Flight attendant know to start landing process */
     public static Semaphore timeToLand = new Semaphore(0, true);
-    public static Vector<Integer> randomNumbers = generateRandomNumbers();
+    /** Vector or random numbers for seats between 1 and 30 */
+    public static Vector<Integer> listOfSeatNumbers = generateRandomNumbers();
+    /** Mutex used by the passenger to select their boarding pass from the vector and to access the inOrderExiting TreeMap  */
     public static Semaphore mutexPassenger = new Semaphore(1, true);
+    /** Mutex used by the clerk to check the number of passengers served and increment that number */
     public static Semaphore mutexClerk = new Semaphore(1, true);
+    /** Boolean variable set by flight attendant and checked by all the passengers to know
+     * whether or not to enter the zoneQueue or boardingPlaneQueue */
     public static volatile boolean isGateClosed = false;
-
-    public static Semaphore customerEnteringPlane = new Semaphore(0, true);
+    /** Blocking semaphore instance variable */
+    public static Semaphore passengerEnteringPlane = new Semaphore(0, true);
+    /* Semaphore used by flight attendant to let clock know to terminate */
     public static Semaphore flightAttendantDoneCleaning = new Semaphore(0, true);
-    /** TreeSet */
+    /** TreeMap for passengers to leave plane in order of their seat number */
     public static TreeMap<Integer, Semaphore> inOrderExiting = new TreeMap<>();
+
     /**main() method
      * @param args Single command line argument for the number of passengers */
     public static void main(String[] args) {
-
         /* Command line argument validation */
         if (args.length == 1) {
             System.out.println("args provided: " + args[0]);
@@ -90,8 +95,6 @@ public class Main {
             clerk.start();
         }
 
-
-
         /* Start passenger threads */
         for (PassengerThread passenger : passengers) {
             passenger.start();
@@ -101,7 +104,6 @@ public class Main {
         flightAttendant.start();
 
     }
-
 
     /** This function creates a vector of all the numbers between 1 and 30 and shuffles them. */
     private static Vector<Integer> generateRandomNumbers() {
